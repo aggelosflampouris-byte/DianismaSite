@@ -1,0 +1,251 @@
+{% extends "adminpage/base_admin.html" %}
+{% load static %}
+
+{% block title %}{% if is_edit %}Επεξεργασία Άρθρου{% else %}Νέο Άρθρο{% endif %} — DIANISMA.GR Admin{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/adminpage/articles.css' %}" />
+{% endblock %}
+
+{% block breadcrumb %}
+  <a href="{% url 'adminpanel:articles_list' %}">Άρθρα</a>
+  <span class="sep">›</span>
+  <span class="current">{% if is_edit %}Επεξεργασία{% else %}Νέο Άρθρο{% endif %}</span>
+{% endblock %}
+
+{% block content %}
+
+<!-- Page Header -->
+<div class="page-header">
+  <div>
+    <h1 class="page-title">{% if is_edit %}✏️ Επεξεργασία Άρθρου{% else %}✏️ Νέο Άρθρο{% endif %}</h1>
+    <p class="page-subtitle">
+      {% if is_edit %}Τροποποίηση υπάρχοντος άρθρου
+      {% else %}Δημιουργία νέου editorial άρθρου{% endif %}
+    </p>
+  </div>
+  <a href="{% url 'adminpanel:articles_list' %}" class="btn btn-outline" id="btn-back-articles">
+    ← Πίσω στα Άρθρα
+  </a>
+</div>
+
+<form method="POST"
+      action="{% if is_edit %}{% url 'adminpanel:article_edit' article.id %}{% else %}{% url 'adminpanel:article_create' %}{% endif %}"
+      id="article-form"
+      enctype="multipart/form-data"
+      novalidate>
+  {% csrf_token %}
+
+  <div class="editorial-grid">
+
+    <!-- ── Main Column ─────────────────────────────────────────────────────── -->
+    <div class="editorial-main">
+
+      <!-- Title -->
+      <div class="card">
+        <div class="card-body">
+          <div class="form-group">
+            <label class="form-label" for="title">
+              Τίτλος Άρθρου <span class="required">*</span>
+            </label>
+            <input
+              class="form-control {% if errors.title %}is-invalid{% endif %}"
+              type="text"
+              id="title"
+              name="title"
+              value="{{ form_data.title|default:'' }}"
+              placeholder="Γράψτε έναν ελκυστικό τίτλο..."
+              maxlength="255"
+              required
+            />
+            {% if errors.title %}
+              <div class="form-error">⚠️ {{ errors.title }}</div>
+            {% endif %}
+          </div>
+
+          <!-- PDF File Upload -->
+          <div class="form-group" style="margin-top: 16px;">
+            <label class="form-label" for="pdf_file">Αρχείο PDF (Προαιρετικό)</label>
+            <input
+              class="form-control"
+              type="file"
+              id="pdf_file"
+              name="pdf_file"
+              accept="application/pdf"
+            />
+            {% if is_edit and article.pdf_file %}
+              <div style="font-size: 0.85rem; color: #64748b; margin-top: 6px;">
+                Τρέχον PDF: <a href="{{ article.pdf_file.url }}" target="_blank" style="color: var(--primary-color);">Προβολή</a>
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="author_name">Συντάκτης</label>
+            <input
+              class="form-control"
+              type="text"
+              id="author_name"
+              name="author_name"
+              value="{{ form_data.author_name|default:'' }}"
+              placeholder="Ονοματεπώνυμο συντάκτη"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="excerpt">
+              Σύνοψη / Lead Paragraph <span class="required">*</span>
+            </label>
+            <textarea
+              class="form-control {% if errors.excerpt %}is-invalid{% endif %}"
+              id="excerpt"
+              name="excerpt"
+              rows="3"
+              maxlength="600"
+              placeholder="Σύντομη περιγραφή του άρθρου (έως 600 χαρακτήρες)..."
+              required
+            >{{ form_data.excerpt|default:'' }}</textarea>
+            {% if errors.excerpt %}
+              <div class="form-error">⚠️ {{ errors.excerpt }}</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Rich Text Editor -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">📝 Κυρίως Κείμενο</span>
+        </div>
+        <div class="card-body" style="padding:0;">
+          <div class="editor-toolbar" role="toolbar" aria-label="Εργαλεία επεξεργασίας">
+            <button type="button" class="editor-toolbar-btn" title="Bold" id="tb-bold"><b>B</b></button>
+            <button type="button" class="editor-toolbar-btn" title="Italic" id="tb-italic"><i>I</i></button>
+            <button type="button" class="editor-toolbar-btn" title="Underline" id="tb-underline"><u>U</u></button>
+            <div class="editor-divider"></div>
+            <button type="button" class="editor-toolbar-btn" title="H2" id="tb-h2">H2</button>
+            <button type="button" class="editor-toolbar-btn" title="H3" id="tb-h3">H3</button>
+            <div class="editor-divider"></div>
+            <button type="button" class="editor-toolbar-btn" title="Λίστα" id="tb-ul">☰</button>
+            <button type="button" class="editor-toolbar-btn" title="Αριθμημένη λίστα" id="tb-ol">1.</button>
+            <div class="editor-divider"></div>
+            <button type="button" class="editor-toolbar-btn" title="Σύνδεσμος" id="tb-link">🔗</button>
+            <button type="button" class="editor-toolbar-btn" title="Εικόνα" id="tb-img">🖼️</button>
+            <button type="button" class="editor-toolbar-btn" title="Παράθεμα" id="tb-quote">❝</button>
+          </div>
+          <textarea
+            class="editor-content {% if errors.content %}is-invalid{% endif %}"
+            id="content"
+            name="content"
+            placeholder="Γράψτε το κυρίως κείμενο εδώ (HTML υποστηρίζεται)..."
+            required
+          >{{ form_data.content|default:'' }}</textarea>
+          {% if errors.content %}
+            <div class="form-error" style="padding:8px 16px;">⚠️ {{ errors.content }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Publishing Sidebar ─────────────────────────────────────────────── -->
+    <aside class="publishing-sidebar" id="publishing-sidebar">
+
+      <!-- Status -->
+      <div class="sidebar-card" id="card-status">
+        <div class="sidebar-card-header">
+          📌 Κατάσταση Δημοσίευσης
+        </div>
+        <div class="sidebar-card-body">
+          {% for value, label in status_choices %}
+            <label class="status-dot-row {% if form_data.status == value or not form_data.status and value == 'draft' %}selected{% endif %}"
+                   for="status-{{ value }}">
+              <input type="radio"
+                     name="status"
+                     id="status-{{ value }}"
+                     value="{{ value }}"
+                     {% if form_data.status == value or not form_data.status and value == 'draft' %}checked{% endif %} />
+              <span class="status-dot dot-{{ value }}"></span>
+              <span style="font-size:.875rem;">{{ label }}</span>
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Category -->
+      <div class="sidebar-card" id="card-category">
+        <div class="sidebar-card-header">🗂️ Κατηγορία</div>
+        <div class="sidebar-card-body">
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label" for="category">
+              Κατηγορία <span class="required">*</span>
+            </label>
+            <select class="form-control {% if errors.category %}is-invalid{% endif %}"
+                    id="category" name="category" required>
+              <option value="">— Επιλέξτε κατηγορία —</option>
+              {% for cat in categories %}
+                <option value="{{ cat.slug }}"
+                        {% if form_data.category == cat.slug %}selected{% endif %}>
+                  {{ cat.name }}
+                </option>
+              {% endfor %}
+            </select>
+            {% if errors.category %}
+              <div class="form-error">⚠️ {{ errors.category }}</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Featured Image -->
+      <div class="sidebar-card" id="card-image">
+        <div class="sidebar-card-header">🖼️ Κύρια Εικόνα</div>
+        <div class="sidebar-card-body">
+          <div class="form-group">
+            <label class="form-label" for="lead_image_url">URL Εικόνας</label>
+            <input class="form-control" type="url" id="lead_image_url" name="lead_image_url"
+                   value="{{ form_data.lead_image_url|default:'' }}"
+                   placeholder="https://..." />
+          </div>
+        </div>
+      </div>
+
+      <!-- Read time -->
+      <div class="sidebar-card" id="card-readtime">
+        <div class="sidebar-card-header">⏱️ Χρόνος Ανάγνωσης</div>
+        <div class="sidebar-card-body">
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label" for="read_time_minutes">Λεπτά</label>
+            <input class="form-control" type="number" id="read_time_minutes"
+                   name="read_time_minutes" min="1" max="60"
+                   value="{{ form_data.read_time_minutes|default:5 }}" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Save Actions -->
+      <div class="sidebar-card" id="card-save">
+        <div class="sidebar-card-body">
+          <div class="save-actions">
+            <button type="submit" name="status" value="published"
+                    class="btn btn-gold" id="btn-save-primary">
+              💾 {% if is_edit %}Αποθήκευση{% else %}Δημοσίευση{% endif %}
+            </button>
+            <button type="submit" name="status" value="draft"
+                    class="btn btn-outline" id="btn-save-draft">
+              📝 Αποθήκευση ως Πρόχειρο
+            </button>
+            <a href="{% url 'adminpanel:articles_list' %}"
+               class="btn btn-outline" id="btn-cancel-form">
+              ✕ Άκυρο
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+  </div>
+</form>
+
+{% endblock %}

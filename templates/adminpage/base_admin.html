@@ -1,0 +1,183 @@
+{% load static %}<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Boss Panel — DIANISMA.GR{% endblock %}</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="{% static 'css/adminpage/admin_base.css' %}" />
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<div class="admin-shell">
+
+  <!-- ── Sidebar ─────────────────────────────────────────────────────────────── -->
+  <aside class="admin-sidebar" id="adminSidebar">
+
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-logo">
+        <i class="fas fa-crown brand-crown"></i>
+        DIANISMA.GR
+        <span>BOSS PANEL</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Admin Navigation">
+
+      <span class="sidebar-section-label">ΚΕΝΤΡΟ ΕΛΕΓΧΟΥ</span>
+
+      <a href="{% url 'adminpanel:dashboard' %}"
+         class="sidebar-link {% if active_page == 'dashboard' %}active{% endif %}"
+         id="nav-dashboard">
+        <span class="link-icon"><i class="fas fa-chart-line"></i></span>
+        Dashboard
+      </a>
+
+      <span class="sidebar-section-label" style="margin-top:16px;">ΠΕΡΙΕΧΟΜΕΝΟ</span>
+
+      <a href="{% url 'adminpanel:articles_list' %}"
+         class="sidebar-link {% if active_page == 'articles' %}active{% endif %}"
+         id="nav-articles">
+        <span class="link-icon"><i class="fas fa-newspaper"></i></span>
+        Άρθρα
+      </a>
+
+      <a href="{% url 'adminpanel:article_create' %}"
+         class="sidebar-link"
+         id="nav-article-new">
+        <span class="link-icon"><i class="fas fa-plus-circle"></i></span>
+        Νέο Άρθρο
+      </a>
+
+      <a href="{% url 'adminpanel:categories_list' %}"
+         class="sidebar-link {% if active_page == 'categories' %}active{% endif %}"
+         id="nav-categories">
+        <span class="link-icon"><i class="fas fa-tags"></i></span>
+        Κατηγορίες
+      </a>
+
+      <span class="sidebar-section-label" style="margin-top:16px;">BOSS ONLY</span>
+
+      {% if user.is_superuser %}
+      <a href="{% url 'adminpanel:users_list' %}"
+         class="sidebar-link {% if active_page == 'users' %}active{% endif %}"
+         id="nav-users">
+        <span class="link-icon"><i class="fas fa-user-shield"></i></span>
+        Διαχείριση Χρηστών
+      </a>
+
+      <a href="{% url 'adminpanel:site_settings' %}"
+         class="sidebar-link {% if active_page == 'settings' %}active{% endif %}"
+         id="nav-settings">
+        <span class="link-icon"><i class="fas fa-cog"></i></span>
+        Ρυθμίσεις Site
+      </a>
+      {% endif %}
+
+      <span class="sidebar-section-label" style="margin-top:16px;">ΣΥΣΤΗΜΑ</span>
+
+      <a href="/admin/"
+         class="sidebar-link"
+         id="nav-django-admin"
+         target="_blank">
+        <span class="link-icon"><i class="fas fa-database"></i></span>
+        Django Admin
+        <i class="fas fa-external-link-alt" style="font-size:10px; margin-left:auto; opacity:.5;"></i>
+      </a>
+
+    </nav>
+
+    <footer class="sidebar-footer">
+      <a href="{% url 'index' %}" target="_blank" class="sidebar-footer-link" id="nav-view-site">
+        <i class="fas fa-globe"></i> Προβολή Site
+      </a>
+      <a href="{% url 'adminpanel:logout' %}" class="sidebar-footer-link danger-link" id="nav-logout">
+        <i class="fas fa-sign-out-alt"></i> Αποσύνδεση
+      </a>
+    </footer>
+
+  </aside>
+
+  <!-- ── Header ──────────────────────────────────────────────────────────────── -->
+  <header class="admin-header" id="adminHeader">
+
+    <nav class="header-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'adminpanel:dashboard' %}"><i class="fas fa-home"></i> Admin</a>
+      <span class="sep">›</span>
+      {% block breadcrumb %}
+        <span class="current">Dashboard</span>
+      {% endblock %}
+    </nav>
+
+    <form class="header-search" role="search" action="{% url 'adminpanel:articles_list' %}" method="GET">
+      <i class="fas fa-search"></i>
+      <input type="search" name="q" placeholder="Αναζήτηση άρθρων..." aria-label="Αναζήτηση" />
+    </form>
+
+    <div class="header-actions">
+
+      <a href="{% url 'index' %}" target="_blank" class="header-view-site-btn" id="btn-view-site">
+        <i class="fas fa-globe"></i> <span>Site</span>
+      </a>
+
+      <div class="header-user-pill" id="admin-avatar-wrap">
+        <div class="header-avatar" id="admin-avatar">
+          {{ user.username|first|upper }}
+        </div>
+        <div class="header-user-info">
+          <span class="header-username">{{ user.get_full_name|default:user.username }}</span>
+          <span class="header-role">{% if user.is_superuser %}Super Admin{% else %}Editor{% endif %}</span>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ── Main Content ─────────────────────────────────────────────────────────── -->
+  <main class="admin-main" id="adminMain">
+
+    <!-- Flash / Messages -->
+    {% if messages %}
+      <div class="alert-list" id="alert-list" role="alert">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}" role="status">
+            {% if message.tags == 'success' %}<i class="fas fa-check-circle"></i>
+            {% elif message.tags == 'error' or message.tags == 'danger' %}<i class="fas fa-exclamation-circle"></i>
+            {% elif message.tags == 'warning' %}<i class="fas fa-exclamation-triangle"></i>
+            {% else %}<i class="fas fa-info-circle"></i>{% endif %}
+            {{ message }}
+            <button class="alert-close" onclick="this.parentElement.remove()" aria-label="Κλείσιμο">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+
+  </main>
+</div>
+
+{% block extra_js %}{% endblock %}
+
+<script>
+  // Auto-dismiss alerts after 5 seconds
+  document.addEventListener('DOMContentLoaded', () => {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+      setTimeout(() => {
+        alert.style.transition = 'opacity .4s ease';
+        alert.style.opacity = '0';
+        setTimeout(() => alert.remove(), 400);
+      }, 5000);
+    });
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,213 @@
+{% load static %}<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Dianisma.gr | Ειδήσεις & Ανάλυση{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Dianisma.gr - Έγκυρη ενημέρωση, πολιτική ανάλυση, οικονομικά νέα, κοινωνικά θέματα και απόψεις.{% endblock %}">
+    <link rel="canonical" href="{% block canonical_url %}{{ request.build_absolute_uri }}{% endblock %}">
+
+    <!-- Open Graph / Social Media Tags -->
+    {% block og_tags %}
+    <meta property="og:site_name" content="Dianisma.gr">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Dianisma.gr | Ειδήσεις & Ανάλυση">
+    <meta property="og:description" content="Dianisma.gr - Έγκυρη ενημέρωση, πολιτική ανάλυση, οικονομικά νέα, κοινωνικά θέματα και απόψεις.">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}/static/images/logo.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Dianisma.gr | Ειδήσεις & Ανάλυση">
+    <meta name="twitter:description" content="Dianisma.gr - Έγκυρη ενημέρωση, πολιτική ανάλυση, οικονομικά νέα, κοινωνικά θέματα και απόψεις.">
+    <meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}/static/images/logo.png">
+    {% endblock %}
+
+    <!-- Schema.org JSON-LD Structured Data -->
+    {% block schema_org %}{% endblock %}
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Base CSS -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    
+    <!-- Page Specific CSS -->
+    {% block extra_css %}{% endblock %}
+
+    <style>
+        /* Toast / Message Alerts */
+        .django-messages-container {
+            max-width: 1200px;
+            margin: 16px auto 0;
+            padding: 0 20px;
+        }
+        .django-alert {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            font-weight: 500;
+        }
+        .django-alert-success {
+            background-color: #ECFDF5;
+            color: #065F46;
+            border-left: 4px solid #10B981;
+        }
+        .django-alert-error, .django-alert-danger {
+            background-color: #FEF2F2;
+            color: #991B1B;
+            border-left: 4px solid #EF4444;
+        }
+        .django-alert-warning {
+            background-color: #FFFBEB;
+            color: #92400E;
+            border-left: 4px solid #F59E0B;
+        }
+        .django-alert-info {
+            background-color: #EFF6FF;
+            color: #1E40AF;
+            border-left: 4px solid #3B82F6;
+        }
+        .alert-close-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: inherit;
+            opacity: 0.7;
+        }
+        .alert-close-btn:hover { opacity: 1; }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="site-header">
+        <div class="container header-container">
+            <div class="logo">
+                <a href="{% url 'index' %}">DIANISMA<span class="logo-accent">.GR</span></a>
+            </div>
+            
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="{% url 'politiki' %}" class="{% if request.resolver_match.url_name == 'politiki' %}active{% endif %}">ΠΟΛΙΤΙΚΗ</a></li>
+                    <li><a href="{% url 'oikonomia' %}" class="{% if request.resolver_match.url_name == 'oikonomia' %}active{% endif %}">ΟΙΚΟΝΟΜΙΑ</a></li>
+                    <li><a href="{% url 'koinonia' %}" class="{% if request.resolver_match.url_name == 'koinonia' %}active{% endif %}">ΚΟΙΝΩΝΙΑ</a></li>
+                    <li><a href="{% url 'analyseis' %}" class="{% if request.resolver_match.url_name == 'analyseis' %}active{% endif %}">ΑΝΑΛΥΣΕΙΣ</a></li>
+                    <li><a href="{% url 'apopseis' %}" class="{% if request.resolver_match.url_name == 'apopseis' %}active{% endif %}">ΑΠΟΨΕΙΣ</a></li>
+                </ul>
+            </nav>
+            
+            <form method="GET" action="{% url 'search' %}" class="header-search-form" style="display: flex; align-items: center; background: #f1f5f9; border-radius: 20px; padding: 4px 12px; margin-right: 8px;">
+                <input type="search" name="q" placeholder="Αναζήτηση..." style="border: none; background: transparent; font-size: 13px; outline: none; width: 130px; color: #0f172a;" />
+                <button type="submit" style="background: none; border: none; cursor: pointer; color: #64748b; padding: 0 4px;" aria-label="Search">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+
+
+        </div>
+    </header>
+
+    <!-- Global Messages Container -->
+    {% if messages %}
+    <div class="django-messages-container">
+        {% for message in messages %}
+            <div class="django-alert django-alert-{{ message.tags }}">
+                <span>{{ message }}</span>
+                <button type="button" class="alert-close-btn" onclick="this.parentElement.style.display='none';">&times;</button>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="container footer-container">
+            <div class="footer-links" style="display:flex;gap:16px;flex-wrap:wrap;">
+                <a href="{% url 'about' %}">Σχετικά</a>
+                <a href="{% url 'contact' %}">Επικοινωνία</a>
+                <a href="{% url 'terms' %}">Όροι Χρήσης</a>
+                <a href="{% url 'privacy' %}">Πολιτική Απορρήτου</a>
+                <a href="{% url 'cookie_policy' %}">Πολιτική Cookies</a>
+                <a href="{% url 'copyright_notice' %}">Πνευματικά Δικαιώματα</a>
+                <a href="#" onclick="if(window.openCookieConsent){window.openCookieConsent();} return false;">Ρυθμίσεις Cookies</a>
+            </div>
+            <div class="footer-social">
+                <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ═══════════════════════════════════════════════════════
+         GDPR COOKIE CONSENT BANNER & MODAL
+    ═══════════════════════════════════════════════════════ -->
+    <div id="cookieConsentBanner" style="display:none; position:fixed; bottom:0; left:0; right:0; z-index:9999; background:rgba(15,23,42,0.96); backdrop-filter:blur(8px); color:#fff; padding:18px 24px; box-shadow:0 -4px 20px rgba(0,0,0,0.25); font-size:0.9rem;">
+        <div class="container" style="display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; max-width:1200px; margin:0 auto;">
+            <div style="flex:1; min-width:280px; line-height:1.5; color:#E2E8F0;">
+                🍪 Χρησιμοποιούμε cookies για να διασφαλίσουμε την καλύτερη δυνατή εμπειρία περιήγησης, να αναλύουμε την επισκεψιμότητα και να προβάλλουμε προσαρμοσμένο περιεχόμενο. Διαβάστε την <a href="{% url 'cookie_policy' %}" style="color:#F59E0B; text-decoration:underline;">Πολιτική Cookies</a> και την <a href="{% url 'privacy' %}" style="color:#F59E0B; text-decoration:underline;">Πολιτική Απορρήτου</a>.
+            </div>
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                <button id="btnAcceptCookies" style="padding:10px 20px; background:#A16207; color:#fff; border:none; border-radius:6px; font-weight:700; cursor:pointer; font-size:0.85rem; transition:background 0.2s;">
+                    Αποδοχή Όλων
+                </button>
+                <button id="btnRejectCookies" style="padding:10px 18px; background:transparent; color:#CBD5E1; border:1px solid #475569; border-radius:6px; font-weight:600; cursor:pointer; font-size:0.85rem;">
+                    Απόρριψη Μη Απαραίτητων
+                </button>
+                <button id="btnCookieSettings" style="padding:10px 14px; background:transparent; color:#94A3B8; border:none; text-decoration:underline; font-weight:500; cursor:pointer; font-size:0.85rem;">
+                    Ρυθμίσεις
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cookie Settings Modal -->
+    <div id="cookieSettingsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:10000; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:20px;">
+        <div style="background:#fff; color:#0F172A; max-width:540px; width:100%; border-radius:12px; padding:28px; box-shadow:0 10px 30px rgba(0,0,0,0.3); font-size:0.92rem; line-height:1.6; position:relative;">
+            <h3 style="font-family:'Lora',serif; font-size:1.4rem; margin:0 0 12px; color:#0F172A;">Ρυθμίσεις Ιδιωτικότητας & Cookies</h3>
+            <p style="color:#64748B; font-size:0.88rem; margin-bottom:20px;">Επιλέξτε ποιες κατηγορίες cookies επιτρέπετε να αποθηκεύονται στον φυλλομετρητή σας.</p>
+            
+            <div style="display:flex; flex-direction:column; gap:14px; margin-bottom:24px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; background:#F8FAFC; padding:12px 16px; border-radius:8px; border:1px solid #E2E8F0;">
+                    <div>
+                        <strong style="display:block; font-size:0.92rem;">🔒 Απολύτως Απαραίτητα</strong>
+                        <span style="font-size:0.8rem; color:#64748B;">Απαραίτητα για τη λειτουργία του ιστότοπου</span>
+                    </div>
+                    <input type="checkbox" checked disabled style="accent-color:#A16207;">
+                </div>
+                <div style="display:flex; align-items:center; justify-content:space-between; background:#F8FAFC; padding:12px 16px; border-radius:8px; border:1px solid #E2E8F0;">
+                    <div>
+                        <strong style="display:block; font-size:0.92rem;">📈 Αναλυτικά / Analytics</strong>
+                        <span style="font-size:0.8rem; color:#64748B;">Google Analytics & Στατιστικά επισκεψιμότητας</span>
+                    </div>
+                    <input type="checkbox" id="chkAnalytics" checked style="accent-color:#A16207;">
+                </div>
+            </div>
+
+            <div style="display:flex; gap:10px; justify-content:flex-end;">
+                <button id="btnCloseCookieModal" style="padding:10px 18px; background:#F1F5F9; color:#475569; border:none; border-radius:6px; font-weight:600; cursor:pointer;">Ακύρωση</button>
+                <button onclick="document.getElementById('btnAcceptCookies').click();" style="padding:10px 20px; background:#0F172A; color:#fff; border:none; border-radius:6px; font-weight:700; cursor:pointer;">Αποθήκευση Επιλογών</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/load-more.js' %}"></script>
+    <script src="{% static 'js/cookie-consent.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

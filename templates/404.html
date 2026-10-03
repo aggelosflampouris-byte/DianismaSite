@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}404 — Η σελίδα δεν βρέθηκε | Dianisma.gr{% endblock %}
+{% block meta_description %}Η σελίδα που αναζητάτε δεν βρέθηκε στο Dianisma.gr. Χρησιμοποιήστε την αναζήτηση ή περιηγηθείτε στις κύριες κατηγορίες μας.{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 800px; margin: 80px auto; text-align: center; padding: 0 20px;">
+    <div style="font-size: 6rem; font-weight: 800; color: #A16207; font-family: 'Lora', serif; line-height: 1;">404</div>
+    <h1 style="font-family: 'Lora', serif; font-size: 2rem; color: #0F172A; margin: 20px 0 10px;">Η σελίδα δεν βρέθηκε</h1>
+    <p style="font-size: 1.1rem; color: #64748B; margin-bottom: 36px; max-width: 540px; margin-left: auto; margin-right: auto; line-height: 1.6;">
+        Η σελίδα που αναζητάτε δεν υπάρχει, έχει αφαιρεθεί ή η διεύθυνση URL που πληκτρολογήσατε είναι εσφαλμένη.
+    </p>
+
+    <!-- Search Form -->
+    <form method="GET" action="{% url 'search' %}" style="max-width: 480px; margin: 0 auto 40px; display: flex; gap: 10px;">
+        <input type="search" name="q" placeholder="Αναζητήστε άρθρα, θέματα ή αρθρογράφους..." required
+               style="flex: 1; padding: 12px 18px; border: 2px solid #E2E8F0; border-radius: 8px; font-size: 0.95rem; outline: none; transition: border-color 0.2s;"
+               onfocus="this.style.borderColor='#A16207'" onblur="this.style.borderColor='#E2E8F0'">
+        <button type="submit" style="padding: 12px 24px; background: #0F172A; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;">
+            <i class="fas fa-search"></i> Αναζήτηση
+        </button>
+    </form>
+
+    <!-- Quick Navigation Links -->
+    <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 28px; margin-bottom: 40px;">
+        <h3 style="font-size: 1rem; color: #0F172A; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px;">Δημοφιλείς Κατηγορίες</h3>
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+            <a href="{% url 'politiki' %}" style="padding: 8px 18px; background: #fff; border: 1px solid #CBD5E1; border-radius: 20px; color: #0F172A; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: all 0.2s;">ΠΟΛΙΤΙΚΗ</a>
+            <a href="{% url 'oikonomia' %}" style="padding: 8px 18px; background: #fff; border: 1px solid #CBD5E1; border-radius: 20px; color: #0F172A; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: all 0.2s;">ΟΙΚΟΝΟΜΙΑ</a>
+            <a href="{% url 'koinonia' %}" style="padding: 8px 18px; background: #fff; border: 1px solid #CBD5E1; border-radius: 20px; color: #0F172A; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: all 0.2s;">ΚΟΙΝΩΝΙΑ</a>
+            <a href="{% url 'analyseis' %}" style="padding: 8px 18px; background: #fff; border: 1px solid #CBD5E1; border-radius: 20px; color: #0F172A; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: all 0.2s;">ΑΝΑΛΥΣΕΙΣ</a>
+            <a href="{% url 'apopseis' %}" style="padding: 8px 18px; background: #fff; border: 1px solid #CBD5E1; border-radius: 20px; color: #0F172A; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: all 0.2s;">ΑΠΟΨΕΙΣ</a>
+        </div>
+    </div>
+
+    <a href="{% url 'index' %}" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 28px; background: #A16207; color: #fff; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 0.95rem;">
+        <i class="fas fa-home"></i> Επιστροφή στην Αρχική
+    </a>
+</div>
+{% endblock %}

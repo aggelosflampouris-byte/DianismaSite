@@ -1,0 +1,75 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Σύνδεση Διαχειριστή — DIANISMA.GR</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="{% static 'css/adminpage/admin_base.css' %}" />
+</head>
+<body>
+
+<div class="login-page" id="login-page">
+  <div class="login-card" role="main">
+
+    <div class="login-gold-bar"></div>
+
+    <div class="login-brand">
+      <div class="login-brand-name">DIANISMA.GR</div>
+      <div class="login-brand-sub">Διαχείριση Πλατφόρμας</div>
+    </div>
+
+    {% if error %}
+      <div class="alert alert-error" role="alert" style="margin-bottom:20px;">
+        ❌ {{ error }}
+      </div>
+    {% endif %}
+
+    <form method="POST" action="{% url 'adminpanel:login' %}" id="login-form" novalidate>
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}" />
+
+      <div class="form-group">
+        <label class="form-label" for="username">Όνομα Χρήστη</label>
+        <input
+          class="form-control"
+          type="text"
+          id="username"
+          name="username"
+          placeholder="admin"
+          autocomplete="username"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">Κωδικός Πρόσβασης</label>
+        <input
+          class="form-control"
+          type="password"
+          id="password"
+          name="password"
+          placeholder="••••••••"
+          autocomplete="current-password"
+          required
+        />
+      </div>
+
+      <button type="submit" class="login-submit-btn" id="btn-login">
+        🔐 Σύνδεση
+      </button>
+
+    </form>
+
+    <p style="text-align:center; margin-top:24px; font-size:.78rem; color:var(--text-light);">
+      Demo: <strong>admin</strong> / <strong>dianisma2024</strong>
+    </p>
+
+  </div>
+</div>
+
+</body>
+</html>

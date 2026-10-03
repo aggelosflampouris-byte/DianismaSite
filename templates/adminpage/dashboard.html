@@ -1,0 +1,302 @@
+{% extends "adminpage/base_admin.html" %}
+{% load static %}
+
+{% block title %}Boss Dashboard — DIANISMA.GR{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/adminpage/dashboard.css' %}" />
+{% endblock %}
+
+{% block breadcrumb %}
+  <span class="current"><i class="fas fa-chart-line"></i> Dashboard</span>
+{% endblock %}
+
+{% block content %}
+
+<!-- Page Header -->
+<div class="page-header">
+  <div>
+    <h1 class="page-title">📊 Boss Dashboard</h1>
+    <p class="page-subtitle">
+      Επισκόπηση πλατφόρμας &mdash;
+      {{ kpis.total_articles }} άρθρα &bull;
+      {{ kpis.total_views }} προβολές
+    </p>
+  </div>
+  <div style="display:flex; gap:10px; align-items:center;">
+    <a href="{% url 'adminpanel:article_create' %}" class="btn btn-gold" id="btn-new-article-dash">
+      <i class="fas fa-plus"></i> Νέο Άρθρο
+    </a>
+    {% if user.is_superuser %}
+    <a href="{% url 'adminpanel:user_create' %}" class="btn btn-outline" id="btn-new-user-dash">
+      <i class="fas fa-user-plus"></i> Νέος Χρήστης
+    </a>
+    {% endif %}
+  </div>
+</div>
+
+<!-- ── KPI Grid ──────────────────────────────────────────────────────────────── -->
+<div class="kpi-grid" id="kpi-grid">
+
+  <div class="kpi-card" id="kpi-total-articles">
+    <div class="kpi-card-top">
+      <div class="kpi-icon kpi-icon-navy"><i class="fas fa-newspaper"></i></div>
+      <span class="kpi-badge kpi-badge-blue">ΑΡΘΡΑ</span>
+    </div>
+    <div class="kpi-value">{{ kpis.total_articles }}</div>
+    <div class="kpi-label">Σύνολο Άρθρων</div>
+    <div class="kpi-sub">
+      <span class="kpi-sub-item green">✅ {{ kpis.published_articles }} Δημ.</span>
+      <span class="kpi-sub-item amber">⏳ {{ kpis.pending_articles }} Εκκρ.</span>
+      <span class="kpi-sub-item muted">📝 {{ kpis.draft_articles }} Draft</span>
+    </div>
+  </div>
+
+  <div class="kpi-card" id="kpi-views">
+    <div class="kpi-card-top">
+      <div class="kpi-icon kpi-icon-gold"><i class="fas fa-eye"></i></div>
+      <span class="kpi-badge kpi-badge-gold">TRAFFIC</span>
+    </div>
+    <div class="kpi-value">{{ kpis.total_views|default:"0" }}</div>
+    <div class="kpi-label">Συνολικές Προβολές</div>
+    <div class="kpi-sub">
+      <span class="kpi-sub-item green">↑ Ζωντανά δεδομένα DB</span>
+    </div>
+  </div>
+
+  <div class="kpi-card" id="kpi-authors">
+    <div class="kpi-card-top">
+      <div class="kpi-icon kpi-icon-purple"><i class="fas fa-users"></i></div>
+      <span class="kpi-badge kpi-badge-purple">TEAM</span>
+    </div>
+    <div class="kpi-value">{{ kpis.total_authors }}</div>
+    <div class="kpi-label">Εγκεκριμένοι Συντάκτες</div>
+    <div class="kpi-sub">
+      <span class="kpi-sub-item muted">👤 {{ kpis.total_users }} χρήστες συνολικά</span>
+    </div>
+  </div>
+
+
+</div>
+
+<!-- ── Main Analytics Grid ───────────────────────────────────────────────────── -->
+<div class="dashboard-grid" id="dashboard-charts">
+
+  <!-- Traffic Bar Chart -->
+  <div class="chart-card" id="chart-traffic">
+    <div class="chart-header">
+      <span class="chart-title"><i class="fas fa-chart-bar"></i> Επισκεψιμότητα (Εκτίμηση)</span>
+      <div class="chart-period-btns">
+        <button class="chart-period-btn active" id="btn-period-7d" data-period="7d">7Η</button>
+        <button class="chart-period-btn" id="btn-period-30d" data-period="30d">30Η</button>
+        <button class="chart-period-btn" id="btn-period-90d" data-period="90d">90Η</button>
+      </div>
+    </div>
+    <div class="chart-body">
+      <div class="bar-chart" id="bar-chart" aria-label="Γράφημα επισκεψιμότητας">
+        {% for label, height in day_data %}
+        <div class="bar-group">
+          <div class="bar-fill" data-height="{{ height }}" role="img" aria-label="{{ label }}: {{ height }}%">
+            <div class="bar-tooltip">{{ height }}%</div>
+          </div>
+          <span class="bar-label">{{ label }}</span>
+        </div>
+        {% empty %}
+        <!-- Fallback static bars -->
+        <div class="bar-group"><div class="bar-fill" data-height="65"><div class="bar-tooltip">Δευ</div></div><span class="bar-label">Δευ</span></div>
+        <div class="bar-group"><div class="bar-fill" data-height="80"><div class="bar-tooltip">Τρί</div></div><span class="bar-label">Τρί</span></div>
+        <div class="bar-group"><div class="bar-fill" data-height="55"><div class="bar-tooltip">Τετ</div></div><span class="bar-label">Τετ</span></div>
+        <div class="bar-group"><div class="bar-fill" data-height="90"><div class="bar-tooltip">Πέμ</div></div><span class="bar-label">Πέμ</span></div>
+        <div class="bar-group"><div class="bar-fill" data-height="75"><div class="bar-tooltip">Παρ</div></div><span class="bar-label">Παρ</span></div>
+        <div class="bar-group"><div class="bar-fill" data-height="40"><div class="bar-tooltip">Σάβ</div></div><span class="bar-label">Σάβ</span></div>
+        <div class="bar-group"><div class="bar-fill" data-height="50"><div class="bar-tooltip">Κυρ</div></div><span class="bar-label">Κυρ</span></div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Category Distribution -->
+  <div class="category-dist-card card" id="chart-categories">
+    <div class="card-header">
+      <span class="card-title"><i class="fas fa-tags"></i> Κατανομή Κατηγοριών</span>
+      <a href="{% url 'adminpanel:categories_list' %}" class="btn btn-outline btn-sm">Διαχείριση</a>
+    </div>
+    <div class="category-dist-list">
+      {% for cat in kpis.category_data %}
+        <div class="category-dist-item">
+          <div class="category-dist-meta">
+            <span class="category-dist-name">{{ cat.name }}</span>
+            <span class="category-dist-count">{{ cat.count }} άρθρα &bull; {{ cat.pct }}%</span>
+          </div>
+          <div class="category-dist-bar">
+            <div class="category-dist-fill" data-width="{{ cat.pct }}"></div>
+          </div>
+        </div>
+      {% empty %}
+        <p style="color:#64748b; text-align:center; padding:20px;">Δεν υπάρχουν κατηγορίες.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Author Performance ────────────────────────────────────────────────────── -->
+{% if kpis.author_stats %}
+<div class="section-block" id="section-authors">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title"><i class="fas fa-pen-fancy"></i> Απόδοση Συντακτών (Top)</span>
+      <a href="{% url 'adminpanel:users_list' %}" class="btn btn-outline btn-sm">Συντάκτες →</a>
+    </div>
+    <div class="card-body" style="padding:0;">
+      <table class="recent-table" id="author-perf-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Συντάκτης</th>
+            <th>Άρθρα</th>
+            <th>Συνολικές Προβολές</th>
+            <th>Μ.Ο. Views/Άρθρο</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in kpis.author_stats %}
+          <tr>
+            <td><span class="rank-badge">{{ forloop.counter }}</span></td>
+            <td><strong>{{ a.author_name|default:"Άγνωστος" }}</strong></td>
+            <td>{{ a.count }}</td>
+            <td><span class="views-count"><i class="fas fa-eye"></i> {{ a.views|default:0 }}</span></td>
+            <td>{{ a.views|default:0|divisibleby:a.count|yesno:"—,—" }}
+              {% if a.count > 0 %}
+                {% widthratio a.views|default:0 a.count 1 %}
+              {% else %}0{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- ── Top Articles ───────────────────────────────────────────────────────────── -->
+<div class="section-block" id="section-top-articles">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title"><i class="fas fa-fire"></i> Δημοφιλέστερα Άρθρα</span>
+      <a href="{% url 'adminpanel:articles_list' %}" class="btn btn-outline btn-sm">Όλα →</a>
+    </div>
+    <div class="card-body" style="padding:0;">
+      <table class="recent-table" id="top-articles-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Τίτλος</th>
+            <th>Κατηγορία</th>
+            <th>Κατάσταση</th>
+            <th>Προβολές</th>
+            <th>Ενέργειες</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for article in kpis.top_articles %}
+            <tr>
+              <td><span class="rank-badge">{{ forloop.counter }}</span></td>
+              <td class="article-title-cell">
+                <a href="{% url 'adminpanel:article_edit' article.id %}" class="article-title-link">{{ article.title }}</a>
+                <div class="article-meta-small">
+                  {{ article.author_name }} &bull; {{ article.created_at|date:"d/m/Y" }}
+                  {% if article.is_featured %}<span class="featured-chip">⭐ Featured</span>{% endif %}
+                </div>
+              </td>
+              <td><span class="category-chip">{{ article.category.name|default:"—" }}</span></td>
+              <td><span class="badge {{ article.status_badge_class }}">{{ article.get_status_display }}</span></td>
+              <td><span class="views-count"><i class="fas fa-eye"></i> {{ article.views_count }}</span></td>
+              <td class="action-cell">
+                <a href="{% url 'adminpanel:article_edit' article.id %}" class="action-btn edit-btn" title="Επεξεργασία"><i class="fas fa-edit"></i></a>
+                <form method="POST" action="{% url 'adminpanel:article_toggle_status' article.id %}" style="display:inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="action-btn status-btn" title="Αλλαγή κατάστασης">
+                    {% if article.status == 'published' %}<i class="fas fa-eye-slash"></i>{% else %}<i class="fas fa-check-circle"></i>{% endif %}
+                  </button>
+                </form>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="6" style="text-align:center; padding:24px; color:#64748B;">Δεν υπάρχουν δημοσιευμένα άρθρα.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── Recent Activity Grid ───────────────────────────────────────────────────── -->
+<div class="recent-grid" id="recent-activity">
+
+  <!-- Recent Articles -->
+  <div class="card" id="card-recent-articles">
+    <div class="card-header">
+      <span class="card-title"><i class="fas fa-newspaper"></i> Πρόσφατα Άρθρα</span>
+      <a href="{% url 'adminpanel:articles_list' %}" class="btn btn-outline btn-sm">Όλα →</a>
+    </div>
+    <div class="card-body" style="padding:0;">
+      <table class="recent-table" id="recent-articles-table">
+        <thead>
+          <tr>
+            <th>Τίτλος</th>
+            <th>Κατηγορία</th>
+            <th>Κατάσταση</th>
+            <th>Προβολές</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for article in kpis.recent_articles %}
+            <tr>
+              <td class="article-title-cell">
+                <a href="{% url 'adminpanel:article_edit' article.id %}"
+                   class="article-title-link"
+                   title="{{ article.title }}">{{ article.title|truncatechars:52 }}</a>
+                <div class="article-meta-small">{{ article.author_name }} &bull; {{ article.created_at|date:"d/m/Y H:i" }}</div>
+              </td>
+              <td><span class="category-chip">{{ article.category.name|default:"—" }}</span></td>
+              <td><span class="badge {{ article.status_badge_class }}">{{ article.get_status_display }}</span></td>
+              <td><span class="views-count"><i class="fas fa-eye"></i> {{ article.views_count }}</span></td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4" style="text-align:center; padding: 20px; color: #64748B;">Δεν υπάρχουν άρθρα.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Bar chart heights
+    document.querySelectorAll('.bar-fill[data-height]').forEach(el => {
+      el.style.height = el.dataset.height + '%';
+    });
+
+    // Category distribution widths
+    document.querySelectorAll('.category-dist-fill[data-width]').forEach(el => {
+      el.style.width = el.dataset.width + '%';
+    });
+
+    // Chart period toggle
+    document.querySelectorAll('.chart-period-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.chart-period-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+  });
+</script>
+{% endblock %}

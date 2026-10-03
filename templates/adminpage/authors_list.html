@@ -1,0 +1,122 @@
+{% extends "adminpage/base_admin.html" %}
+{% load static %}
+
+{% block title %}Αιτήσεις Συντακτών — DIANISMA.GR Admin{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/adminpage/authors.css' %}" />
+{% endblock %}
+
+{% block breadcrumb %}
+  <a href="{% url 'adminpanel:authors_list' %}">Αιτήσεις Συντακτών</a>
+  <span class="sep">›</span>
+  <span class="current">Όλες οι Αιτήσεις</span>
+{% endblock %}
+
+{% block content %}
+
+<!-- Page Header -->
+<div class="page-header">
+  <div>
+    <h1 class="page-title">👥 Αιτήσεις Συντακτών</h1>
+    <p class="page-subtitle">
+      {{ applications.count }} αιτήσεις
+      {% if pending_count > 0 %} &bull; <strong>{{ pending_count }} εκκρεμείς</strong>{% endif %}
+    </p>
+  </div>
+</div>
+
+<!-- Filter Tabs -->
+<div class="filter-tabs" role="tablist" id="author-filter-tabs">
+
+  <a href="{% url 'adminpanel:authors_list' %}"
+     class="filter-tab {% if not status_filter %}active{% endif %}"
+     role="tab"
+     id="tab-all">
+    Όλες
+    <span class="filter-tab-count">{{ applications.count }}</span>
+  </a>
+
+  <a href="{% url 'adminpanel:authors_list' %}?status=pending"
+     class="filter-tab {% if status_filter == 'pending' %}active{% endif %}"
+     role="tab"
+     id="tab-pending">
+    ⏳ Εκκρεμείς
+    {% if pending_count > 0 %}
+      <span class="filter-tab-count">{{ pending_count }}</span>
+    {% endif %}
+  </a>
+
+  <a href="{% url 'adminpanel:authors_list' %}?status=approved"
+     class="filter-tab {% if status_filter == 'approved' %}active{% endif %}"
+     role="tab"
+     id="tab-approved">
+    ✅ Εγκεκριμένες
+  </a>
+
+  <a href="{% url 'adminpanel:authors_list' %}?status=rejected"
+     class="filter-tab {% if status_filter == 'rejected' %}active{% endif %}"
+     role="tab"
+     id="tab-rejected">
+    ❌ Απορριφθείσες
+  </a>
+
+</div>
+
+<!-- Applicants Grid -->
+{% if applications %}
+  <div class="applicants-grid" id="applicants-grid">
+    {% for app in applications %}
+      <article class="applicant-card-full" id="app-card-{{ app.id }}">
+
+        <div class="applicant-card-top-bar {{ app.status }}"></div>
+
+        <div class="applicant-card-body">
+
+          <div class="applicant-header">
+            <div class="applicant-avatar-large">{{ app.full_name|first|upper }}</div>
+            <div class="applicant-header-info">
+              <div class="applicant-name-large">{{ app.full_name }}</div>
+              <div class="applicant-profession">{{ app.profession }}</div>
+              <div class="applicant-topic-badge">🎯 {{ app.topic_interest }}</div>
+            </div>
+          </div>
+
+          <p class="applicant-bio-preview">{{ app.bio }}</p>
+
+          <div class="applicant-card-meta">
+            <span>📅 Υποβολή: {{ app.created_at|date:"d/m/Y H:i" }}</span>
+            <span class="badge {{ app.status_badge_class }}">
+              {{ app.get_status_display }}
+            </span>
+          </div>
+
+        </div>
+
+        <div class="applicant-card-footer">
+          <a href="{% url 'adminpanel:author_detail' app.id %}"
+             class="review-btn"
+             id="btn-view-app-{{ app.id }}">
+            🔎 Εξέταση Αίτησης
+          </a>
+        </div>
+
+      </article>
+    {% endfor %}
+  </div>
+
+{% else %}
+  <div class="empty-state" id="authors-empty">
+    <div class="empty-state-icon">📭</div>
+    <div class="empty-state-title">Δεν βρέθηκαν αιτήσεις</div>
+    <div class="empty-state-desc">
+      {% if status_filter %}
+        Δεν υπάρχουν αιτήσεις με κατάσταση «{{ status_filter }}».
+      {% else %}
+        Δεν έχουν υποβληθεί αιτήσεις ακόμα.
+      {% endif %}
+    </div>
+  </div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Dianisma.gr | ΑΠΟΨΕΙΣ & ΣΧΟΛΙΑ - Επιφυλλίδες, Αναλυτές & Στοχασμοί{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/apopseis.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Category Title Banner -->
+<section class="category-banner oped-banner">
+    <div class="container banner-inner">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="{% url 'index' %}"><i class="fas fa-home"></i> ΑΡΧΙΚΗ</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">ΑΠΟΨΕΙΣ</span>
+        </nav>
+        
+        <div class="banner-headline-wrap">
+            <div class="banner-title-group">
+                <span class="banner-tag"><i class="fas fa-feather-alt"></i> ΕΠΙΦΥΛΛΙΔΕΣ & OP-EDS</span>
+                <h1 class="banner-title">ΑΠΟΨΕΙΣ & ΣΧΟΛΙΑ</h1>
+            </div>
+            <p class="banner-description">
+                Προσωπικές αναγνώσεις, στοχασμοί, πολιτική φιλοσοφία και ελεύθερος δημόσιος διάλογος από κορυφαίους αρθρογράφους.
+            </p>
+        </div>
+
+    </div>
+</section>
+
+<!-- Featured Horizontal Op-Ed Cards Grid -->
+<section class="featured-opeds-section">
+    <div class="container">
+        <div class="section-title-row">
+            <h2 class="section-title">ΚΟΡΥΦΑΙΟΙ ΑΡΘΡΟΓΡΑΦΟΙ</h2>
+            <span class="section-rule"></span>
+        </div>
+
+        <div class="oped-horizontal-grid">
+            {% if hero_article %}
+            <article class="oped-highlight-card">
+                <div class="oped-card-top">
+                    <img src="{{ hero_article.display_author_avatar }}" alt="{{ hero_article.display_author_name }}" class="oped-avatar">
+                    <div class="oped-author-meta">
+                        <span class="author-caps-name">{{ hero_article.display_author_name|upper }}</span>
+                        <span class="author-column-tag">ΣΤΗΛΗ «ΕΠΙΦΥΛΛΙΔΑ»</span>
+                    </div>
+                    <span class="gold-badge-opinion">ΑΠΟΨΗ</span>
+                </div>
+                <div class="oped-card-body">
+                    <h3 class="oped-card-title">
+                        <a href="{% url 'article_detail' hero_article.slug %}">{{ hero_article.title }}</a>
+                    </h3>
+                    <p class="oped-card-quote">
+                        «{{ hero_article.excerpt }}»
+                    </p>
+                </div>
+                <div class="oped-card-footer">
+                    <span class="oped-time"><i class="far fa-clock"></i> {{ hero_article.read_time_minutes }} min read</span>
+                    <span class="oped-date">{{ hero_article.created_at|date:"d F Y" }}</span>
+                </div>
+            </article>
+            {% endif %}
+
+            {% for art in articles %}
+            <article class="oped-highlight-card">
+                <div class="oped-card-top">
+                    <img src="{{ art.display_author_avatar }}" alt="{{ art.display_author_name }}" class="oped-avatar">
+                    <div class="oped-author-meta">
+                        <span class="author-caps-name">{{ art.display_author_name|upper }}</span>
+                        <span class="author-column-tag">ΣΤΗΛΗ «ΣΤΟΧΑΣΜΟΙ»</span>
+                    </div>
+                    <span class="gold-badge-opinion">ΑΠΟΨΗ</span>
+                </div>
+                <div class="oped-card-body">
+                    <h3 class="oped-card-title">
+                        <a href="{% url 'article_detail' art.slug %}">{{ art.title }}</a>
+                    </h3>
+                    <p class="oped-card-quote">
+                        «{{ art.excerpt }}»
+                    </p>
+                </div>
+                <div class="oped-card-footer">
+                    <span class="oped-time"><i class="far fa-clock"></i> {{ art.read_time_minutes }} min read</span>
+                    <span class="oped-date">{{ art.created_at|date:"d F Y" }}</span>
+                </div>
+            </article>
+            {% empty %}
+            {% if not hero_article %}
+            <article class="oped-highlight-card">
+                <div class="oped-card-top">
+                    <img src="https://i.pravatar.cc/150?img=11" alt="Γιάννης Κωνσταντίνου" class="oped-avatar">
+                    <div class="oped-author-meta">
+                        <span class="author-caps-name">ΓΙΑΝΝΗΣ ΚΩΝΣΤΑΝΤΙΝΟΥ</span>
+                        <span class="author-column-tag">ΣΤΗΛΗ «ΣΗΜΕΙΟ ΣΤΙΞΗΣ»</span>
+                    </div>
+                    <span class="gold-badge-opinion">ΑΠΟΨΗ</span>
+                </div>
+                <div class="oped-card-body">
+                    <h3 class="oped-card-title">
+                        <a href="#">Η κοινωνική συνοχή σε κίνδυνο: Γιατί οι δείκτες ευημερούν αλλά η καθημερινότητα απομακρύνεται;</a>
+                    </h3>
+                    <p class="oped-card-quote">
+                        «Η δημοκρατία δεν δοκιμάζεται στην αφθονία των μακροοικονομικών εξαγγελιών, αλλά στο αίσθημα δικαιοσύνης που βιώνει ο πολίτης στην καθημερινότητά του.»
+                    </p>
+                </div>
+                <div class="oped-card-footer">
+                    <span class="oped-time"><i class="far fa-clock"></i> 5 min read</span>
+                    <span class="oped-date">11 Σεπτεμβρίου 2026</span>
+                </div>
+            </article>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Main Feed Layout -->
+<div class="container page-content oped-main-layout">
+
+    <!-- Left Main Column -->
+    <div class="main-column">
+        <section class="quote-intermezzo">
+            <blockquote class="lead-quote">
+                «Ο διάλογος δεν είναι απλώς μέσο ανταλλαγής επιχειρημάτων, είναι η ουσία της ίδιας της δημοκρατικής συγκρότησης.»
+            </blockquote>
+        </section>
+
+
+    </div>
+
+    <!-- Right Sidebar -->
+    <aside class="sidebar-column">
+        {% include "components/trending_widget.html" with trending_title="ΔΗΜΟΦΙΛΕΙΣ ΑΠΟΨΕΙΣ" %}
+    </aside>
+
+</div>
+{% endblock %}

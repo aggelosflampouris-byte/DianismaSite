@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Dianisma.gr | ΟΙΚΟΝΟΜΙΑ - Αγορές, Επιχειρήσεις, Τράπεζες & Ανάλυση{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/oikonomia.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Market Ticker Tape Banner -->
+<div class="market-ticker-bar">
+    <div class="container ticker-container">
+        <div class="ticker-label">
+            <span class="pulse-indicator"></span>
+            <i class="fas fa-chart-line"></i> ΑΓΟΡΕΣ LIVE
+        </div>
+        <div class="ticker-scroll-wrapper">
+            <div class="ticker-items">
+                <div class="ticker-item">
+                    <span class="ticker-name">ΓΔ Χ.Α.</span>
+                    <span class="ticker-value">1.482,30</span>
+                    <span class="ticker-change positive"><i class="fas fa-caret-up"></i> +0,64%</span>
+                </div>
+                <div class="ticker-separator">&bull;</div>
+                <div class="ticker-item">
+                    <span class="ticker-name">FTSE 25</span>
+                    <span class="ticker-value">3.612,15</span>
+                    <span class="ticker-change positive"><i class="fas fa-caret-up"></i> +0,78%</span>
+                </div>
+                <div class="ticker-separator">&bull;</div>
+                <div class="ticker-item">
+                    <span class="ticker-name">S&P 500</span>
+                    <span class="ticker-value">5.620,40</span>
+                    <span class="ticker-change positive"><i class="fas fa-caret-up"></i> +0,45%</span>
+                </div>
+                <div class="ticker-separator">&bull;</div>
+                <div class="ticker-item">
+                    <span class="ticker-name">DAX 40</span>
+                    <span class="ticker-value">18.720,10</span>
+                    <span class="ticker-change negative"><i class="fas fa-caret-down"></i> -0,12%</span>
+                </div>
+                <div class="ticker-separator">&bull;</div>
+                <div class="ticker-item">
+                    <span class="ticker-name">EUR / USD</span>
+                    <span class="ticker-value">1,0845</span>
+                    <span class="ticker-change positive"><i class="fas fa-caret-up"></i> +0,18%</span>
+                </div>
+                <div class="ticker-separator">&bull;</div>
+                <div class="ticker-item">
+                    <span class="ticker-name">Brent Oil</span>
+                    <span class="ticker-value">74,20 $</span>
+                    <span class="ticker-change negative"><i class="fas fa-caret-down"></i> -0,85%</span>
+                </div>
+                <div class="ticker-separator">&bull;</div>
+                <div class="ticker-item">
+                    <span class="ticker-name">10Y GR Bond</span>
+                    <span class="ticker-value">3,18%</span>
+                    <span class="ticker-change positive"><i class="fas fa-caret-down"></i> -4 bps</span>
+                </div>
+                <div class="ticker-separator">&bull;</div>
+                <div class="ticker-item">
+                    <span class="ticker-name">Χρυσός</span>
+                    <span class="ticker-value">2.520 $</span>
+                    <span class="ticker-change positive"><i class="fas fa-caret-up"></i> +0,55%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Category Title Banner -->
+<section class="category-banner economy-banner">
+    <div class="container banner-inner">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="{% url 'index' %}"><i class="fas fa-home"></i> ΑΡΧΙΚΗ</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">ΟΙΚΟΝΟΜΙΑ</span>
+        </nav>
+        
+        <div class="banner-headline-wrap">
+            <div class="banner-title-group">
+                <span class="banner-tag"><i class="fas fa-coins"></i> ΚΑΤΗΓΟΡΙΑ</span>
+                <h1 class="banner-title">ΟΙΚΟΝΟΜΙΑ</h1>
+            </div>
+            <p class="banner-description">
+                Στρατηγικές αναλύσεις, επενδυτικές κινήσεις, τραπεζικό ρεπορτάζ και οι παλμοί των διεθνών και εγχώριων χρηματαγορών.
+            </p>
+        </div>
+
+    </div>
+</section>
+
+<!-- Main Page Layout: Content Area + Sidebar -->
+<div class="container page-content economy-layout">
+
+    <!-- Left Main Column -->
+    <div class="main-column">
+        
+        <!-- Hero Article -->
+        {% if hero_article %}
+        <section class="hero-section">
+            <article class="hero-article-card economy-hero-card">
+                <div class="hero-badge-row">
+                    <span class="gold-badge"><i class="fas fa-award"></i> ΚΥΡΙΟ ΑΡΘΡΟ</span>
+                    <span class="hero-date"><i class="far fa-clock"></i> {{ hero_article.created_at|date:"d F Y &middot; H:i" }}</span>
+                </div>
+                
+                <div class="hero-text-wrap">
+                    <h2 class="hero-title">
+                        <a href="{% url 'article_detail' hero_article.slug %}">{{ hero_article.title }}</a>
+                    </h2>
+                    <p class="hero-summary">
+                        {{ hero_article.excerpt }}
+                    </p>
+                    
+                    <div class="hero-meta">
+                        <div class="author-info">
+                            <span class="author-label">ΑΝΑΛΥΣΗ:</span>
+                            <span class="author-name">{{ hero_article.display_author_name }}</span>
+                        </div>
+                        <span class="dot-separator">&middot;</span>
+                        <div class="read-info">
+                            <i class="far fa-clock"></i>
+                            <span class="read-time">{{ hero_article.read_time_minutes }} min read</span>
+                        </div>
+                        <span class="dot-separator">&middot;</span>
+                        <span class="badge-cat-label">FINANCIAL INSIGHTS</span>
+                    </div>
+                </div>
+            </article>
+        </section>
+        {% endif %}
+
+        <!-- Articles Grid -->
+        <section class="articles-grid-section">
+            <div class="section-title-row">
+                <h3 class="section-title">ΕΠΙΧΕΙΡΗΣΕΙΣ, ΑΓΟΡΕΣ & ΟΙΚΟΝΟΜΙΚΗ ΠΟΛΙΤΙΚΗ</h3>
+                <span class="section-rule"></span>
+            </div>
+
+            <div class="articles-grid-wrap" id="articlesGrid">
+                {% for art in articles %}
+                {% include "components/category_card.html" %}
+                {% endfor %}
+            </div>
+
+            <!-- Pagination / Load More -->
+            {% if has_next %}
+            <div class="load-more-wrap">
+                <button class="btn-load-more" id="loadMoreBtn"
+                        data-category="{{ category_slug }}"
+                        data-next-page="{{ next_page }}"
+                        data-card-type="category"
+                        data-exclude-ids="{{ exclude_ids_str }}"
+                        data-target="#articlesGrid">
+                    <span>ΠΕΡΙΣΣΟΤΕΡΑ ΟΙΚΟΝΟΜΙΚΑ ΑΡΘΡΑ</span>
+                    <i class="fas fa-arrow-down"></i>
+                </button>
+            </div>
+            {% endif %}
+        </section>
+
+    </div>
+
+    <!-- Right Sidebar Column -->
+    <aside class="sidebar-column">
+        
+        <!-- Popular Articles Widget -->
+        {% include "components/trending_widget.html" with trending_title="ΔΗΜΟΦΙΛΗ ΣΤΗΝ ΟΙΚΟΝΟΜΙΑ" %}
+
+    </aside>
+
+</div>
+{% endblock %}

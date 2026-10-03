@@ -1,0 +1,213 @@
+{% extends "adminpage/base_admin.html" %}
+{% load static %}
+
+{% block title %}Άρθρα — DIANISMA.GR Admin{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/adminpage/articles.css' %}" />
+{% endblock %}
+
+{% block breadcrumb %}
+  <a href="{% url 'adminpanel:articles_list' %}">Άρθρα</a>
+  <span class="sep">›</span>
+  <span class="current">Όλα τα Άρθρα</span>
+{% endblock %}
+
+{% block content %}
+
+<!-- Page Header -->
+<div class="page-header">
+  <div>
+    <h1 class="page-title">📰 Άρθρα</h1>
+    <p class="page-subtitle">{{ articles.count }} άρθρα βρέθηκαν</p>
+  </div>
+  <a href="{% url 'adminpanel:article_create' %}" class="btn btn-gold" id="btn-new-article">
+    ✏️ Νέο Άρθρο
+  </a>
+</div>
+
+<!-- Filter Bar -->
+<form class="filter-bar" method="GET" action="{% url 'adminpanel:articles_list' %}" id="filter-form">
+
+  <div class="filter-search-wrap">
+    <span>🔍</span>
+    <input
+      type="search"
+      name="q"
+      value="{{ query }}"
+      placeholder="Αναζήτηση τίτλου ή συντάκτη..."
+      id="filter-search-input"
+      aria-label="Αναζήτηση"
+    />
+  </div>
+
+  <select name="category" class="filter-select" id="filter-category" aria-label="Κατηγορία">
+    <option value="">Όλες οι κατηγορίες</option>
+    {% for cat in categories %}
+      <option value="{{ cat.slug }}" {% if category_filter == cat.slug %}selected{% endif %}>
+        {{ cat.name }}
+      </option>
+    {% endfor %}
+  </select>
+
+  <select name="status" class="filter-select" id="filter-status" aria-label="Κατάσταση">
+    <option value="">Όλες οι καταστάσεις</option>
+    <option value="published" {% if status_filter == 'published' %}selected{% endif %}>✅ Δημοσιευμένα</option>
+    <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>⏳ Προς Έγκριση</option>
+    <option value="draft" {% if status_filter == 'draft' %}selected{% endif %}>📝 Πρόχειρα</option>
+    <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>❌ Απορριφθέντα</option>
+  </select>
+
+  <button type="submit" class="filter-apply-btn" id="btn-filter-apply">Φίλτρο</button>
+
+</form>
+
+<!-- Articles Table -->
+<div class="articles-table-card" id="articles-table-card">
+
+  <div class="articles-table-header">
+    <span class="text-sm text-muted">
+      Εμφάνιση <strong>{{ articles.count }}</strong> άρθρων
+    </span>
+    <div class="flex gap-2">
+      <a href="{% url 'adminpanel:articles_list' %}?status=pending"
+         class="btn btn-outline btn-sm" id="btn-pending-quick">
+        ⏳ Προς Έγκριση
+      </a>
+    </div>
+  </div>
+
+  {% if articles %}
+    <table class="articles-table" id="articles-table">
+      <thead>
+        <tr>
+          <th class="col-check"><input type="checkbox" class="table-checkbox" id="select-all" aria-label="Επιλογή όλων" /></th>
+          <th class="col-thumb"></th>
+          <th class="col-title">Τίτλος</th>
+          <th class="col-cat">Κατηγορία</th>
+          <th class="col-author">Συντάκτης</th>
+          <th class="col-status">Κατάσταση</th>
+          <th class="col-views">Προβολές</th>
+          <th class="col-date">Ημερομηνία</th>
+          <th class="col-actions">Ενέργειες</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for article in articles %}
+          <tr id="article-row-{{ article.id }}">
+
+            <td class="col-check">
+              <input type="checkbox" class="table-checkbox row-check"
+                     id="check-{{ article.id }}"
+                     aria-label="Επιλογή άρθρου {{ article.id }}" />
+            </td>
+
+            <td class="col-thumb">
+              <div class="article-thumb">
+                {% if article.lead_image_url or article.lead_image %}
+                  <img src="{{ article.get_image_url }}" alt="{{ article.title }}" />
+                {% else %}
+                  📰
+                {% endif %}
+              </div>
+            </td>
+
+            <td class="col-title article-title-col">
+              <a href="{% url 'adminpanel:article_edit' article.id %}"
+                 class="article-title-main"
+                 title="{{ article.title }}">
+                {{ article.title }}
+                {% if article.pdf_file %}
+                  <span class="badge" style="background:#f1f5f9; color:#475569; font-size:10px; margin-left:6px;">📎 PDF</span>
+                {% endif %}
+              </a>
+              {% if article.is_featured %}
+                <span class="article-featured-badge">⭐ Κεντρικό</span>
+              {% endif %}
+            </td>
+
+            <td class="col-cat">
+              <span class="category-chip">{{ article.category.name }}</span>
+            </td>
+
+            <td class="col-author">
+              <span class="text-sm">{{ article.display_author_name }}</span>
+            </td>
+
+            <td class="col-status">
+              <span class="badge {{ article.status_badge_class }}">
+                {{ article.get_status_display }}
+              </span>
+            </td>
+
+            <td class="col-views">
+              <span class="views-count">👁 {{ article.views_count }}</span>
+            </td>
+
+            <td class="col-date">
+              <span class="text-sm text-muted">{{ article.created_at|date:"d/m/Y H:i" }}</span>
+            </td>
+
+            <td class="col-actions">
+              <div class="action-btns">
+                <a href="{% url 'adminpanel:article_edit' article.id %}"
+                   class="action-btn edit"
+                   title="Επεξεργασία"
+                   id="btn-edit-{{ article.id }}">✏️</a>
+
+                <form method="POST"
+                      action="{% url 'adminpanel:article_toggle_status' article.id %}"
+                      style="display:inline;"
+                      id="form-toggle-{{ article.id }}">
+                  {% csrf_token %}
+                  <button type="submit"
+                          class="action-btn toggle"
+                          title="Εναλλαγή Κατάστασης"
+                          id="btn-toggle-{{ article.id }}">
+                    {% if article.status == 'published' %}🔴{% else %}🟢{% endif %}
+                  </button>
+                </form>
+
+                <form method="POST"
+                      action="{% url 'adminpanel:article_delete' article.id %}"
+                      style="display:inline;"
+                      onsubmit="return confirm('Διαγραφή άρθρου «{{ article.title }}»; Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.');"
+                      id="form-delete-{{ article.id }}">
+                  {% csrf_token %}
+                  <button type="submit"
+                          class="action-btn delete"
+                          title="Διαγραφή"
+                          id="btn-delete-{{ article.id }}">🗑️</button>
+                </form>
+              </div>
+            </td>
+
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="empty-state" id="articles-empty">
+      <div class="empty-state-icon">📭</div>
+      <div class="empty-state-title">Δεν βρέθηκαν άρθρα</div>
+      <div class="empty-state-desc">Δοκιμάστε να αλλάξετε τα φίλτρα αναζήτησης.</div>
+    </div>
+  {% endif %}
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Select all checkboxes
+  const selectAll = document.getElementById('select-all');
+  if (selectAll) {
+    selectAll.addEventListener('change', () => {
+      document.querySelectorAll('.row-check').forEach(cb => {
+        cb.checked = selectAll.checked;
+      });
+    });
+  }
+</script>
+{% endblock %}

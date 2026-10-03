@@ -1,0 +1,257 @@
+{% extends "adminpage/base_admin.html" %}
+{% load static %}
+
+{% block title %}{{ application.full_name }} — Αίτηση Συντάκτη — DIANISMA.GR Admin{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/adminpage/authors.css' %}" />
+{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'adminpanel:authors_list' %}">Αιτήσεις Συντακτών</a>
+<span class="sep">›</span>
+<span class="current">{{ application.full_name }}</span>
+{% endblock %}
+
+{% block content %}
+
+<!-- Page Header -->
+<div class="page-header">
+  <div>
+    <h1 class="page-title">📁 Φάκελος Υποψηφίου</h1>
+    <p class="page-subtitle">Εξέταση αίτησης συντάκτη</p>
+  </div>
+  <a href="{% url 'adminpanel:authors_list' %}" class="btn btn-outline" id="btn-back-authors">
+    ← Πίσω στις Αιτήσεις
+  </a>
+</div>
+
+<!-- Dossier Grid -->
+<div class="dossier-grid" id="dossier-grid">
+
+  <!-- ── Main Dossier Content ──────────────────────────────────────────────── -->
+  <div class="dossier-main">
+
+    <!-- Hero Header Card -->
+    <div class="dossier-header-card" id="dossier-header">
+      <div class="dossier-avatar">{{ application.full_name|first|upper }}</div>
+      <div class="dossier-header-info">
+        <div class="dossier-name">{{ application.full_name }}</div>
+        <div class="dossier-profession">{{ application.profession }}</div>
+        <div class="dossier-meta-row">
+          <div class="dossier-meta-item">
+            🎯 <strong>{{ application.topic_interest }}</strong>
+          </div>
+          <div class="dossier-meta-item">
+            📧 <strong>{{ application.email }}</strong>
+          </div>
+          <div class="dossier-meta-item">
+            📅 Υποβολή: <strong>{{ application.created_at|date:"d/m/Y H:i" }}</strong>
+          </div>
+        </div>
+      </div>
+      <div style="margin-left:auto; flex-shrink:0;">
+        <span class="badge {{ application.status_badge_class }}" style="font-size:.85rem; padding:6px 14px;">
+          {{ application.get_status_display }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Βιογραφικό -->
+    <section class="dossier-section" id="section-bio">
+      <div class="dossier-section-header">
+        <div class="dossier-section-icon">👤</div>
+        <h2 class="dossier-section-title">Βιογραφικό / Παρουσίαση</h2>
+      </div>
+      <div class="dossier-section-body">
+        <p class="dossier-bio-text">{{ application.bio }}</p>
+      </div>
+    </section>
+
+    <!-- Ερωτηματολόγιο -->
+    <section class="dossier-section" id="section-questionnaire">
+      <div class="dossier-section-header">
+        <div class="dossier-section-icon">📋</div>
+        <h2 class="dossier-section-title">Απαντήσεις Ερωτηματολογίου</h2>
+      </div>
+      <div class="dossier-section-body">
+        <div class="questionnaire-list">
+
+          {% if application.questionnaire_data.experience_years %}
+          <div class="q-item">
+            <div class="q-question">Χρόνια εμπειρίας</div>
+            <div class="q-answer">{{ application.questionnaire_data.experience_years }} χρόνια</div>
+          </div>
+          {% endif %}
+
+          {% if application.questionnaire_data.previous_publications %}
+          <div class="q-item">
+            <div class="q-question">Προηγούμενες δημοσιεύσεις / ΜΜΕ</div>
+            <div class="q-answer">{{ application.questionnaire_data.previous_publications }}</div>
+          </div>
+          {% endif %}
+
+          {% if application.questionnaire_data.motivation %}
+          <div class="q-item">
+            <div class="q-question">Κίνητρο / Γιατί θέλετε να γράψετε στο DIANISMA.GR;</div>
+            <div class="q-answer">{{ application.questionnaire_data.motivation }}</div>
+          </div>
+          {% endif %}
+
+          {% if not application.questionnaire_data %}
+          <p class="text-muted">Δεν υπάρχουν απαντήσεις ερωτηματολογίου.</p>
+          {% endif %}
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Δείγμα Γραφής -->
+    <section class="dossier-section" id="section-sample">
+      <div class="dossier-section-header">
+        <div class="dossier-section-icon">✍️</div>
+        <h2 class="dossier-section-title">Δείγμα Γραφής / Προσχέδιο Άρθρου</h2>
+      </div>
+      <div class="dossier-section-body">
+        <div class="sample-text-box" id="sample-text-content">{{ application.sample_text }}</div>
+      </div>
+    </section>
+
+    <!-- Admin Notes (if any) -->
+    {% if application.admin_notes %}
+    <section class="dossier-section" id="section-notes">
+      <div class="dossier-section-header">
+        <div class="dossier-section-icon">📝</div>
+        <h2 class="dossier-section-title">Σημειώσεις Διαχειριστή</h2>
+      </div>
+      <div class="dossier-section-body">
+        <div class="q-answer">{{ application.admin_notes }}</div>
+      </div>
+    </section>
+    {% endif %}
+
+  </div>
+
+  <!-- ── Action Panel Sidebar ──────────────────────────────────────────────── -->
+  <aside class="action-panel" id="action-panel">
+
+    <!-- Review Form -->
+    <div class="action-panel-card" id="card-review-action">
+      <div class="action-panel-header">
+        ⚖️ Απόφαση Αξιολόγησης
+      </div>
+      <div class="action-panel-body">
+        <form method="POST" action="{% url 'adminpanel:author_review' application.id %}" id="review-form">
+          {% csrf_token %}
+
+          <div class="decision-radio-group" role="radiogroup" aria-label="Επιλογή απόφασης">
+            {% for value, label in decision_choices %}
+            <label class="decision-radio" for="decision-{{ value }}">
+              <input type="radio" name="decision" id="decision-{{ value }}" value="{{ value }}" {% if
+                application.status==value %}checked{% endif %} required />
+              <span class="decision-label">{{ label }}</span>
+            </label>
+            {% endfor %}
+          </div>
+
+          <div class="form-group" style="margin-bottom:16px;">
+            <label class="form-label" for="admin_notes">Σημειώσεις Διαχειριστή</label>
+            <textarea class="form-control" id="admin_notes" name="admin_notes" rows="3"
+              placeholder="Αιτιολογία απόφασης, παρατηρήσεις...">{{ application.admin_notes|default:'' }}</textarea>
+          </div>
+
+          <button type="submit" class="action-submit-btn" id="btn-submit-decision">
+            ✅ Υποβολή Απόφασης
+          </button>
+
+        </form>
+      </div>
+    </div>
+
+    <!-- Quick Action Buttons -->
+    <div class="action-panel-card" id="card-quick-actions">
+      <div class="action-panel-header" style="background:var(--navy-light);">
+        ⚡ Γρήγορες Ενέργειες
+      </div>
+      <div class="action-panel-body" style="display:flex; flex-direction:column; gap:8px;">
+
+        <form method="POST" action="{% url 'adminpanel:author_review' application.id %}" id="form-quick-approve">
+          {% csrf_token %}
+          <input type="hidden" name="decision" value="approved" />
+          <input type="hidden" name="admin_notes" value="Γρήγορη έγκριση από διαχειριστή." />
+          <button type="submit" class="action-submit-btn approve" id="btn-quick-approve">
+            ✅ Έγκριση Συντάκτη
+          </button>
+        </form>
+
+        <form method="POST" action="{% url 'adminpanel:author_review' application.id %}" id="form-quick-reject"
+          onsubmit="return confirm('Απόρριψη αίτησης {{ application.full_name }};');">
+          {% csrf_token %}
+          <input type="hidden" name="decision" value="rejected" />
+          <input type="hidden" name="admin_notes" value="Δεν πληρούνται τα κριτήρια." />
+          <button type="submit" class="action-submit-btn reject" id="btn-quick-reject">
+            ❌ Απόρριψη Αίτησης
+          </button>
+        </form>
+
+      </div>
+    </div>
+
+    <!-- Application Timeline -->
+    <div class="action-panel-card" id="card-timeline">
+      <div class="action-panel-header" style="background:var(--navy-light);">
+        🕒 Χρονολόγιο Αίτησης
+      </div>
+      <div class="action-panel-body">
+        <div class="timeline" id="application-timeline">
+
+          <div class="timeline-item">
+            <div class="timeline-dot-wrap">
+              <div class="timeline-dot"></div>
+              <div class="timeline-line"></div>
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-event">📤 Υποβολή Αίτησης</div>
+              <div class="timeline-time">{{ application.created_at|date:"d/m/Y H:i" }}</div>
+            </div>
+          </div>
+
+          {% if application.reviewed_at %}
+          <div class="timeline-item">
+            <div class="timeline-dot-wrap">
+              {% if application.status == 'approved' %}
+              <div class="timeline-dot" style="background: var(--success);"></div>
+              {% elif application.status == 'rejected' %}
+              <div class="timeline-dot" style="background: var(--danger);"></div>
+              {% else %}
+              <div class="timeline-dot" style="background: var(--warning);"></div>
+              {% endif %}
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-event">
+                {{ application.get_status_display }}
+              </div>
+              <div class="timeline-time">{{ application.reviewed_at|date:"d/m/Y H:i" }}</div>
+            </div>
+          </div>
+          {% else %}
+          <div class="timeline-item">
+            <div class="timeline-dot-wrap">
+              <div class="timeline-dot" style="background:var(--warning);"></div>
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-event">⏳ Αναμονή εξέτασης</div>
+              <div class="timeline-time">Εκκρεμεί</div>
+            </div>
+          </div>
+          {% endif %}
+
+        </div>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+{% endblock %}

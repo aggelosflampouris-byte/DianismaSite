@@ -1,0 +1,19 @@
+<article class="news-card">
+  <a href="{% url 'article_detail' art.slug %}" class="news-card-img-wrap">
+    <img src="{{ art.get_image_url }}" alt="{{ art.title }}" loading="lazy">
+    {% if art.category %}
+    <span class="news-card-badge">{{ art.category.name|upper }}</span>
+    {% endif %}
+  </a>
+  <div class="news-card-body">
+    <h3 class="news-card-title">
+      <a href="{% url 'article_detail' art.slug %}">{{ art.title }}</a>
+    </h3>
+    <p class="news-card-excerpt">{{ art.excerpt|truncatewords:18 }}</p>
+    <div class="news-card-meta">
+      <span><i class="far fa-user"></i> {{ art.display_author_name }}</span>
+      <span><i class="far fa-clock"></i> {{ art.read_time_minutes }} min</span>
+      <span>{{ art.created_at|date:"d/m/Y" }}</span>
+    </div>
+  </div>
+</article>

@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Dianisma.gr | ΑΝΑΛΥΣΕΙΣ - Εμπεριστατωμένη Έρευνα, Δεδομένα & Γεωπολιτική{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/analyseis.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Category Title Banner -->
+<section class="category-banner analysis-banner">
+    <div class="container banner-inner">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="{% url 'index' %}"><i class="fas fa-home"></i> ΑΡΧΙΚΗ</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">ΑΝΑΛΥΣΕΙΣ</span>
+        </nav>
+        
+        <div class="banner-headline-wrap">
+            <div class="banner-title-group">
+                <span class="banner-tag"><i class="fas fa-microscope"></i> ΕΡΕΥΝΗΤΙΚΗ ΔΗΜΟΣΙΟΓΡΑΦΙΑ</span>
+                <h1 class="banner-title">ΑΝΑΛΥΣΕΙΣ</h1>
+            </div>
+            <p class="banner-description">
+                Εμπεριστατωμένες μελέτες, αναλύσεις δεδομένων, γεωπολιτικά μοντέλα και τεκμηριωμένα policy papers από ειδικούς και αναλυτές.
+            </p>
+        </div>
+
+    </div>
+</section>
+
+<!-- Main Page Layout: Content Area + Sidebar -->
+<div class="container page-content analysis-layout">
+
+    <!-- Left Main Column -->
+    <div class="main-column">
+        
+        <!-- Long-form Hero Article -->
+        {% if hero_article %}
+        <section class="hero-section">
+            <article class="hero-article-card analysis-hero-card">
+                <div class="hero-badge-row">
+                    <span class="gold-badge"><i class="fas fa-database"></i> ΕΡΕΥΝΑ & ΔΕΔΟΜΕΝΑ</span>
+                    <span class="hero-date"><i class="far fa-calendar-alt"></i> {{ hero_article.created_at|date:"d F Y" }}</span>
+                </div>
+                
+                <div class="hero-text-wrap">
+                    <h2 class="hero-title">
+                        <a href="{% url 'article_detail' hero_article.slug %}">{{ hero_article.title }}</a>
+                    </h2>
+                    <p class="hero-summary">
+                        {{ hero_article.excerpt }}
+                    </p>
+                    
+                    <div class="hero-meta">
+                        <div class="author-info">
+                            <span class="author-label">ΜΕΛΕΤΗ:</span>
+                            <span class="author-name">{{ hero_article.display_author_name }}</span>
+                        </div>
+                        <span class="dot-separator">&middot;</span>
+                        <div class="read-info">
+                            <i class="far fa-clock"></i>
+                            <span class="read-time">{{ hero_article.read_time_minutes }} min read</span>
+                        </div>
+                        <span class="dot-separator">&middot;</span>
+                        <span class="badge-cat-label">POLICY REPORT</span>
+                    </div>
+                </div>
+            </article>
+        </section>
+        {% endif %}
+
+        <!-- Grid of Documented Articles -->
+        <section class="articles-grid-section">
+            <div class="section-title-row">
+                <h3 class="section-title">ΤΕΚΜΗΡΙΩΜΕΝΕΣ ΕΡΕΥΝΕΣ & ΣΤΟΙΧΕΙΑ</h3>
+                <span class="section-rule"></span>
+            </div>
+
+            <div class="analysis-grid" id="articlesGrid">
+                {% for art in articles %}
+                {% include "components/category_card.html" %}
+                {% endfor %}
+            </div>
+
+            <!-- Pagination / Load More -->
+            {% if has_next %}
+            <div class="load-more-wrap">
+                <button class="btn-load-more" id="loadMoreBtn"
+                        data-category="{{ category_slug }}"
+                        data-next-page="{{ next_page }}"
+                        data-card-type="category"
+                        data-exclude-ids="{{ exclude_ids_str }}"
+                        data-target="#articlesGrid">
+                    <span>ΠΕΡΙΣΣΟΤΕΡΕΣ ΑΝΑΛΥΣΕΙΣ</span>
+                    <i class="fas fa-arrow-down"></i>
+                </button>
+            </div>
+            {% endif %}
+        </section>
+
+    </div>
+
+    <!-- Right Sidebar Column -->
+    <aside class="sidebar-column">
+        
+        <!-- Popular Analyses Widget -->
+        {% include "components/trending_widget.html" with trending_title="ΔΗΜΟΦΙΛΕΙΣ ΑΝΑΛΥΣΕΙΣ" %}
+
+    </aside>
+
+</div>
+{% endblock %}

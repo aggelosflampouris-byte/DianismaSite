@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Πολιτική Πνευματικών Δικαιωμάτων & Αναδημοσίευσης — Dianisma.gr{% endblock %}
+{% block meta_description %}Ενημερωθείτε για τους όρους αναδημοσίευσης και τη χρήση του περιεχομένου του ειδησεογραφικού ιστότοπου Dianisma.gr.{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 900px; margin: 40px auto 80px; padding: 0 20px; line-height: 1.8; color: #334155;">
+
+    <nav aria-label="Breadcrumb" style="margin-bottom: 24px; font-size: 0.85rem; color: #64748b;">
+        <a href="{% url 'index' %}" style="color: #64748b; text-decoration: none;">Αρχική</a> &rsaquo;
+        <span style="color: #0f172a; font-weight: 600;">Πνευματικά Δικαιώματα</span>
+    </nav>
+
+    <h1 style="font-family: 'Lora', serif; font-size: 2.2rem; color: #0F172A; margin-bottom: 12px; font-weight: 700;">Προστασία Πνευματικών Δικαιωμάτων & Όροι Αναδημοσίευσης</h1>
+    <p style="font-size: 0.9rem; color: #64748B; margin-bottom: 32px; border-bottom: 1px solid #E2E8F0; padding-bottom: 16px;">
+        Copyright © 2026 Dianisma.gr — Με την επιφύλαξη παντός δικαιώματος.
+    </p>
+
+    <section style="margin-bottom: 32px;">
+        <h2 style="font-size: 1.3rem; color: #0F172A; font-weight: 700; margin-bottom: 12px;">1. Ιδιοκτησία Περιεχομένου</h2>
+        <p>
+            Το σύνολο του περιεχομένου που δημοσιεύεται στο <strong>Dianisma.gr</strong> (συμπεριλαμβανομένων κειμένων, ειδήσεων, αναλύσεων, φωτογραφιών, γραφημάτων και λογοτύπων) προστατεύεται από τους ελληνικούς και διεθνείς νόμους περί πνευματικής ιδιοκτησίας.
+        </p>
+    </section>
+
+    <section style="margin-bottom: 32px;">
+        <h2 style="font-size: 1.3rem; color: #0F172A; font-weight: 700; margin-bottom: 12px;">2. Όροι Αναδημοσίευσης</h2>
+        <p>
+            Η αναδημοσίευση ή η αναπαραγωγή περιεχομένου του Dianisma.gr σε άλλα μέσα ενημέρωσης, ιστοσελίδες ή έντυπα επιτρέπεται <strong>μόνο υπό τις ακόλουθες προϋποθέσεις</strong>:
+        </p>
+        <div style="background: #FFFBEB; border-left: 4px solid #F59E0B; border-radius: 6px; padding: 20px; margin: 16px 0;">
+            <ul style="margin: 0; padding-left: 20px;">
+                <li><strong>Απόσπασμα έως 150 λέξεις:</strong> Επιτρέπεται η αναδημοσίευση σύντομου αποσπάσματος του κειμένου.</li>
+                <li><strong>Υποχρεωτική Αναφορά Πηγής:</strong> Πρέπει να αναφέρεται ρητά το <em>Dianisma.gr</em> ως πηγή.</li>
+                <li><strong>Ενεργός Σύνδεσμος (Link):</strong> Απαιτείται η προσθήκη ενεργού, ακολούθητου συνδέσμου (link) προς το πρωτότυπο άρθρο της ιστοσελίδας μας.</li>
+            </ul>
+        </div>
+    </section>
+
+    <section style="margin-bottom: 32px;">
+        <h2 style="font-size: 1.3rem; color: #0F172A; font-weight: 700; margin-bottom: 12px;">3. Απαγόρευση Πλήρους Αντιγραφής</h2>
+        <p>
+            Απαγορεύεται αυστηρά η πλήρης αντιγραφή, η αυτόματη αναπαραγωγή μέσω RSS feeds/scrapers ή η εμπορική εκμετάλλευση των άρθρων χωρίς προηγούμενη έγγραφη άδεια της Διεύθυνσης Σύνταξης.
+        </p>
+    </section>
+
+</div>
+{% endblock %}

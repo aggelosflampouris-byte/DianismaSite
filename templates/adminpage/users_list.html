@@ -1,0 +1,111 @@
+{% extends "adminpage/base_admin.html" %}
+{% load static %}
+
+{% block title %}Χρήστες — DIANISMA.GR Boss Panel{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/adminpage/authors.css' %}" />
+{% endblock %}
+
+{% block breadcrumb %}
+  <a href="{% url 'adminpanel:users_list' %}"><i class="fas fa-user-shield"></i> Χρήστες</a>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title"><i class="fas fa-user-shield"></i> Διαχείριση Χρηστών</h1>
+    <p class="page-subtitle">{{ users.count }} χρήστες εγγεγραμμένοι στην πλατφόρμα</p>
+  </div>
+  <a href="{% url 'adminpanel:user_create' %}" class="btn btn-gold" id="btn-add-user">
+    <i class="fas fa-user-plus"></i> Νέος Χρήστης
+  </a>
+</div>
+
+<!-- Search Bar -->
+<div class="filter-bar" id="users-filter-bar">
+  <form method="GET" action="" class="filter-form" id="users-search-form">
+    <div class="search-input-wrap">
+      <i class="fas fa-search"></i>
+      <input type="search" name="q" value="{{ query }}" placeholder="Αναζήτηση username, email..." class="filter-search" id="users-search-input" />
+    </div>
+    <button type="submit" class="btn btn-gold" id="btn-search-users">Αναζήτηση</button>
+    {% if query %}<a href="{% url 'adminpanel:users_list' %}" class="btn btn-outline">✕ Καθαρισμός</a>{% endif %}
+  </form>
+</div>
+
+<!-- Users Table -->
+<div class="card" id="users-table-card">
+  <div class="card-body" style="padding:0;">
+    <table class="recent-table data-table" id="users-table">
+      <thead>
+        <tr>
+          <th>Χρήστης</th>
+          <th>Email</th>
+          <th>Ρόλος</th>
+          <th>Κατάσταση Συντάκτη</th>
+          <th>Εγγραφή</th>
+          <th>Κατάσταση</th>
+          <th>Ενέργειες</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr class="{% if not u.is_active %}row-inactive{% endif %}">
+          <td>
+            <div class="user-cell">
+              <div class="user-avatar-sm">{{ u.username|first|upper }}</div>
+              <div>
+                <strong>{{ u.get_full_name|default:u.username }}</strong>
+                {% if u == request.user %}<span class="you-badge">Εσείς</span>{% endif %}
+                <div class="article-meta-small">@{{ u.username }}</div>
+              </div>
+            </div>
+          </td>
+          <td>{{ u.email|default:"—" }}</td>
+          <td>
+            {% if u.is_superuser %}<span class="role-badge role-super"><i class="fas fa-crown"></i> Super Admin</span>
+            {% elif u.is_staff %}<span class="role-badge role-editor"><i class="fas fa-pen"></i> Editor</span>
+            {% else %}<span class="role-badge role-author"><i class="fas fa-user"></i> Author</span>{% endif %}
+          </td>
+          <td>
+            {% if u.profile %}
+              <span class="badge {% if u.profile.status == 'approved' %}badge-published{% elif u.profile.status == 'pending' %}badge-pending{% else %}badge-rejected{% endif %}">
+                {{ u.profile.get_status_display }}
+              </span>
+            {% else %}<span class="badge badge-draft">Χωρίς Προφίλ</span>{% endif %}
+          </td>
+          <td>{{ u.date_joined|date:"d/m/Y" }}</td>
+          <td>
+            {% if u.is_active %}<span class="badge badge-published">✅ Ενεργός</span>
+            {% else %}<span class="badge badge-rejected">🚫 Ανενεργός</span>{% endif %}
+          </td>
+          <td class="action-cell">
+            {% if u != request.user %}
+            <form method="POST" action="{% url 'adminpanel:user_toggle_active' u.id %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit"
+                      class="action-btn {% if u.is_active %}danger-btn{% else %}edit-btn{% endif %}"
+                      title="{% if u.is_active %}Απενεργοποίηση{% else %}Ενεργοποίηση{% endif %}"
+                      onclick="return confirm('{% if u.is_active %}Να απενεργοποιηθεί ο χρήστης {{ u.username }};{% else %}Να ενεργοποιηθεί ο χρήστης {{ u.username }};{% endif %}')">
+                <i class="fas {% if u.is_active %}fa-ban{% else %}fa-check{% endif %}"></i>
+              </button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" style="text-align:center; padding:32px; color:#64748b;">
+            <i class="fas fa-users" style="font-size:2rem; margin-bottom:12px; display:block;"></i>
+            Δεν βρέθηκαν χρήστες.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

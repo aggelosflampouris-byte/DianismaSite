@@ -1,0 +1,38 @@
+<div class="sidebar-widget popular-widget">
+    <div class="widget-header">
+        <span class="widget-badge"><i class="fas fa-fire"></i> TRENDING</span>
+        <h3 class="widget-title">{{ trending_title|default:'ΔΗΜΟΦΙΛΗ' }}</h3>
+    </div>
+    
+    <div class="popular-list">
+        {% for pop in popular_articles %}
+        <article class="popular-item">
+            <span class="popular-rank">{% if forloop.counter < 10 %}0{% endif %}{{ forloop.counter }}</span>
+            <div class="popular-content">
+                <span class="popular-tag">{{ pop.category.name|upper }}</span>
+                <h4 class="popular-title">
+                    <a href="{% url 'article_detail' pop.slug %}">{{ pop.title }}</a>
+                </h4>
+                <div class="popular-meta">
+                    <span><i class="far fa-clock"></i> {{ pop.read_time_minutes }} min read</span>
+                    <span class="meta-views"><i class="far fa-eye"></i> {{ pop.views_count|default:"0" }}</span>
+                </div>
+            </div>
+        </article>
+        {% empty %}
+        <article class="popular-item">
+            <span class="popular-rank">01</span>
+            <div class="popular-content">
+                <span class="popular-tag">ΠΑΡΑΣΚΗΝΙΟ</span>
+                <h4 class="popular-title">
+                    <a href="#">Οι μυστικές δημοσκοπήσεις του Μαξίμου και οι διορθωτικές κινήσεις</a>
+                </h4>
+                <div class="popular-meta">
+                    <span><i class="far fa-clock"></i> 5 min read</span>
+                    <span class="meta-views"><i class="far fa-eye"></i> 14.2k</span>
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+</div>

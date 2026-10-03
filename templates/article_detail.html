@@ -1,0 +1,443 @@
+{% extends "base.html" %}
+{% load static %}
+{% load article_filters %}
+
+{% block title %}{{ article.title|truncatechars:55 }} — Dianisma.gr{% endblock %}
+{% block meta_description %}{{ article.excerpt|striptags|truncatechars:155 }}{% endblock %}
+{% block canonical_url %}<link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ article.get_absolute_url }}">{% endblock %}
+
+{% block og_tags %}
+<meta property="og:site_name" content="Dianisma.gr">
+<meta property="og:type" content="article">
+<meta property="og:title" content="{{ article.title }}">
+<meta property="og:description" content="{{ article.excerpt|striptags|truncatechars:160 }}">
+<meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ article.get_absolute_url }}">
+<meta property="og:image" content="{{ article.get_image_url }}">
+<meta property="article:published_time" content="{{ article.published_at|date:'c' }}">
+{% if article.category %}<meta property="article:section" content="{{ article.category.name }}">{% endif %}
+<meta property="article:author" content="{{ article.display_author_name }}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ article.title }}">
+<meta name="twitter:description" content="{{ article.excerpt|striptags|truncatechars:160 }}">
+<meta name="twitter:image" content="{{ article.get_image_url }}">
+{% endblock %}
+
+{% block schema_org %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "NewsArticle",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ request.scheme }}://{{ request.get_host }}{{ article.get_absolute_url }}"
+  },
+  "headline": "{{ article.title|escapejs }}",
+  "description": "{{ article.excerpt|striptags|truncatechars:160|escapejs }}",
+  "image": ["{{ article.get_image_url }}"],
+  "datePublished": "{{ article.published_at|date:'c' }}",
+  "dateModified": "{{ article.updated_at|date:'c' }}",
+  "author": {
+    "@type": "Person",
+    "name": "{{ article.display_author_name|escapejs }}"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Dianisma.gr",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "{{ request.scheme }}://{{ request.get_host }}/static/images/logo.png"
+    }
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Αρχική",
+      "item": "{{ request.scheme }}://{{ request.get_host }}/"
+    },
+    {% if article.category %}
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "{{ article.category.name|escapejs }}",
+      "item": "{{ request.scheme }}://{{ request.get_host }}{{ article.category.get_absolute_url }}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "{{ article.title|escapejs }}",
+      "item": "{{ request.scheme }}://{{ request.get_host }}{{ article.get_absolute_url }}"
+    }
+    {% else %}
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "{{ article.title|escapejs }}",
+      "item": "{{ request.scheme }}://{{ request.get_host }}{{ article.get_absolute_url }}"
+    }
+    {% endif %}
+  ]
+}
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ── Article page wrapper ── */
+    .article-detail-page {
+        max-width: 860px;
+        margin: 40px auto 60px;
+        padding: 0 20px;
+        overflow: hidden; /* prevent any child from breaking out */
+    }
+
+    /* ── Header ── */
+    .article-detail-header { margin-bottom: 28px; }
+
+    .article-cat-badge {
+        display: inline-block;
+        background: var(--accent-color, #A16207);
+        color: #fff;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 4px 12px;
+        border-radius: 3px;
+        margin-bottom: 16px;
+        text-decoration: none;
+    }
+    .article-cat-badge:hover { opacity: .85; }
+
+    .article-detail-title {
+        font-family: 'Lora', serif;
+        font-size: clamp(1.6rem, 4vw, 2.3rem);
+        line-height: 1.3;
+        color: var(--navy, #0F172A);
+        font-weight: 700;
+        margin-bottom: 16px;
+    }
+
+    .article-detail-lead {
+        font-size: 1.1rem;
+        line-height: 1.7;
+        color: #475569;
+        font-weight: 500;
+        margin-bottom: 24px;
+        border-left: 3px solid var(--accent-color, #A16207);
+        padding-left: 16px;
+    }
+
+    .article-author-row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #E2E8F0;
+        margin-bottom: 30px;
+    }
+
+    .article-author-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+    }
+
+    .article-author-name { font-weight: 700; font-size: 0.95rem; color: var(--navy, #0F172A); }
+    .article-author-role { font-size: 0.8rem; color: #64748B; }
+
+    .article-detail-meta {
+        margin-left: auto;
+        font-size: 0.82rem;
+        color: #64748B;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    /* ── Featured Image ── */
+    .article-featured-image {
+        width: 100%;
+        max-width: 100%;
+        max-height: 480px;
+        object-fit: cover;
+        border-radius: 12px;
+        margin-bottom: 36px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        display: block;
+    }
+
+    /* ── Article body — CRITICAL image containment ── */
+    .article-detail-body {
+        font-family: 'Lora', serif;
+        font-size: 1.08rem;
+        line-height: 1.85;
+        color: #1E293B;
+        margin-bottom: 50px;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        /* Hard boundary for all children */
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+    .article-detail-body p { margin-bottom: 20px; }
+
+    .article-detail-body h2,
+    .article-detail-body h3,
+    .article-detail-body h4 {
+        font-family: 'Roboto', sans-serif;
+        margin-top: 36px;
+        margin-bottom: 14px;
+        color: var(--navy, #0F172A);
+    }
+
+    /* ── ALL images inside body are strictly contained ── */
+    .article-detail-body img,
+    .article-detail-body figure img,
+    .article-detail-body .article-figure img {
+        max-width: 100% !important;
+        width: auto !important;
+        height: auto !important;
+        display: block;
+        margin: 20px auto;
+        border-radius: 8px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+
+    .article-detail-body figure,
+    .article-detail-body .article-figure {
+        max-width: 100%;
+        margin: 24px 0;
+        text-align: center;
+    }
+
+    .article-detail-body figcaption {
+        font-size: 0.82rem;
+        color: #94A3B8;
+        font-style: italic;
+        margin-top: 8px;
+        font-family: 'Roboto', sans-serif;
+    }
+
+    /* Prevent iframes/embeds from overflowing */
+    .article-detail-body iframe,
+    .article-detail-body video,
+    .article-detail-body embed,
+    .article-detail-body object {
+        max-width: 100% !important;
+    }
+
+    /* Blockquotes */
+    .article-detail-body blockquote {
+        border-left: 4px solid var(--accent-color, #A16207);
+        margin: 28px 0;
+        padding: 12px 20px;
+        background: #FAFAFA;
+        color: #475569;
+        font-style: italic;
+        border-radius: 0 6px 6px 0;
+    }
+
+    /* ── Author bio ── */
+    .author-bio-card {
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        padding: 24px;
+        display: flex;
+        gap: 20px;
+        align-items: center;
+        margin-bottom: 60px;
+        flex-wrap: wrap;
+    }
+
+    .author-bio-avatar {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+    }
+
+    /* ── Related articles ── */
+    .related-section-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--navy, #0F172A);
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--accent-color, #A16207);
+    }
+
+    .related-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 20px;
+    }
+
+    .related-card {
+        background: #fff;
+        border: 1px solid #E2E8F0;
+        border-radius: 8px;
+        overflow: hidden;
+        text-decoration: none;
+        color: inherit;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .related-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    }
+
+    .related-card-img {
+        width: 100%;
+        height: 140px;
+        object-fit: cover;
+        display: block;
+    }
+
+    .related-card-body { padding: 14px; flex: 1; }
+
+    .related-card-title {
+        font-size: 0.92rem;
+        font-weight: 700;
+        line-height: 1.4;
+        color: var(--navy, #0F172A);
+        margin-bottom: 8px;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+        .article-detail-page { padding: 0 14px; }
+        .article-detail-title { font-size: 1.5rem; }
+        .article-detail-lead { font-size: 1rem; }
+        .article-author-row { gap: 10px; }
+        .article-detail-meta { margin-left: 0; }
+        .related-grid { grid-template-columns: 1fr; }
+        .author-bio-card { flex-direction: column; text-align: center; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="article-detail-page">
+
+    <!-- Breadcrumbs -->
+    <nav class="breadcrumb-nav" aria-label="Breadcrumb" style="margin-bottom: 20px; font-size: 0.85rem; color: #64748b; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+        <a href="{% url 'index' %}" style="color: #64748b; text-decoration: none;">Αρχική</a>
+        {% if article.category %}
+        <span>&rsaquo;</span>
+        <a href="{% url 'category' article.category.slug %}" style="color: #64748b; text-decoration: none;">{{ article.category.name }}</a>
+        {% endif %}
+        <span>&rsaquo;</span>
+        <span style="color: #0f172a; font-weight: 600;">{{ article.title|truncatechars:45 }}</span>
+    </nav>
+
+    <!-- Header / Meta -->
+    <header class="article-detail-header">
+        {% if article.category %}
+        <a href="{% url 'category' article.category.slug %}" class="article-cat-badge">
+            {{ article.category.name|upper }}
+        </a>
+        {% endif %}
+
+        <h1 class="article-detail-title">{{ article.title }}</h1>
+
+        {% if article.excerpt %}
+        <p class="article-detail-lead">{{ article.excerpt }}</p>
+        {% endif %}
+
+        <div class="article-author-row">
+            <img src="{{ article.display_author_avatar }}" alt="{{ article.display_author_name }}" class="article-author-avatar">
+            <div>
+                <div class="article-author-name">{{ article.display_author_name }}</div>
+                <div class="article-author-role">{{ article.author_title|default:"Συντάκτης Dianisma" }}</div>
+            </div>
+            <div class="article-detail-meta">
+                <span><i class="far fa-calendar-alt"></i> {{ article.created_at|date:"d M Y" }}</span>
+                <span><i class="far fa-clock"></i> {{ article.read_time_minutes }} min read</span>
+                <span><i class="far fa-eye"></i> {{ article.views_count }}</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Lead Image -->
+    {% if article.get_image_url %}
+    <img src="{{ article.get_image_url }}"
+         alt="{{ article.title }}"
+         class="article-featured-image"
+         loading="eager"
+         onerror="this.style.display='none'">
+    {% endif %}
+
+    <!-- Article Content Body -->
+    <div class="article-detail-body">
+        {% if article.pdf_file %}
+            <div style="text-align:center;margin:40px 0;padding:30px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;">
+                <i class="fas fa-file-pdf" style="font-size:3rem;color:#b91c1c;margin-bottom:15px;display:block;"></i>
+                <h3 style="margin-bottom:10px;color:#0f172a;">Το άρθρο είναι διαθέσιμο σε μορφή PDF</h3>
+                <p style="color:#475569;margin-bottom:20px;">Διαβάστε ή κατεβάστε το πλήρες κείμενο του άρθρου σε μορφή PDF.</p>
+                <a href="{{ article.pdf_file.url }}" target="_blank"
+                   style="display:inline-block;padding:12px 24px;background:#b91c1c;color:white;text-decoration:none;border-radius:6px;font-weight:600;">
+                    <i class="fas fa-download" style="margin-right:8px;"></i> Προβολή / Λήψη PDF
+                </a>
+            </div>
+        {% else %}
+            {{ article.content|clean_content }}
+        {% endif %}
+    </div>
+
+    <!-- Author Bio Box -->
+    <div class="author-bio-card">
+        <img src="{{ article.display_author_avatar }}" alt="{{ article.display_author_name }}" class="author-bio-avatar">
+        <div>
+            <h4 style="margin:0 0 6px;font-size:1rem;color:var(--navy,#0F172A);">
+                {{ article.display_author_name }}
+            </h4>
+            <p style="margin:0;font-size:0.88rem;color:#64748B;line-height:1.5;">
+                {{ article.author.profile.bio|default:"Αρθρογράφος και συνεργάτης του ειδησεογραφικού ιστότοπου DIANISMA.GR." }}
+            </p>
+        </div>
+    </div>
+
+    <!-- Related Articles -->
+    {% if related_articles %}
+    <section class="related-section">
+        <h3 class="related-section-title">ΣΧΕΤΙΚΑ ΑΡΘΡΑ ΣΤΗΝ ΚΑΤΗΓΟΡΙΑ {{ article.category.name|upper }}</h3>
+        <div class="related-grid">
+            {% for rel in related_articles %}
+            <a href="{% url 'article_detail' rel.slug %}" class="related-card">
+                <img src="{{ rel.get_image_url }}"
+                     alt="{{ rel.title }}"
+                     class="related-card-img"
+                     loading="lazy"
+                     onerror="this.style.display='none'">
+                <div class="related-card-body">
+                    <h4 class="related-card-title">{{ rel.title|truncatechars:70 }}</h4>
+                    <span style="font-size:0.78rem;color:#94A3B8;">
+                        <i class="far fa-clock"></i> {{ rel.read_time_minutes }} min read
+                        &nbsp;·&nbsp; {{ rel.created_at|date:"d/m/Y" }}
+                    </span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+</div>
+{% endblock %}

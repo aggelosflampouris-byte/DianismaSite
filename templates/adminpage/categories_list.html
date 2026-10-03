@@ -1,0 +1,72 @@
+{% extends "adminpage/base_admin.html" %}
+{% load static %}
+
+{% block title %}Κατηγορίες — DIANISMA.GR Boss Panel{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/adminpage/articles.css' %}" />
+{% endblock %}
+
+{% block breadcrumb %}
+  <a href="{% url 'adminpanel:categories_list' %}"><i class="fas fa-tags"></i> Κατηγορίες</a>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title"><i class="fas fa-tags"></i> Κατηγορίες Άρθρων</h1>
+    <p class="page-subtitle">{{ categories|length }} κατηγορίες στο σύστημα</p>
+  </div>
+  <a href="{% url 'adminpanel:category_create' %}" class="btn btn-gold" id="btn-add-category">
+    <i class="fas fa-plus"></i> Νέα Κατηγορία
+  </a>
+</div>
+
+<div class="card" id="categories-table-card">
+  <div class="card-body" style="padding:0;">
+    <table class="recent-table data-table" id="categories-table">
+      <thead>
+        <tr>
+          <th>Σειρά</th>
+          <th>Κατηγορία</th>
+          <th>Slug</th>
+          <th>Περιγραφή</th>
+          <th>Άρθρα</th>
+          <th>Ενέργειες</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cat in categories %}
+        <tr>
+          <td><span class="rank-badge">{{ cat.order }}</span></td>
+          <td><strong>{{ cat.name }}</strong></td>
+          <td><code class="slug-chip">{{ cat.slug }}</code></td>
+          <td>{{ cat.description|truncatechars:60|default:"—" }}</td>
+          <td>
+            <a href="{% url 'adminpanel:articles_list' %}?category={{ cat.slug }}" class="views-count">
+              <i class="fas fa-newspaper"></i> {{ cat.art_count }}
+            </a>
+          </td>
+          <td class="action-cell">
+            <a href="{% url 'adminpanel:category_edit' cat.id %}" class="action-btn edit-btn" title="Επεξεργασία">
+              <i class="fas fa-edit"></i>
+            </a>
+            <a href="{% url 'adminpanel:articles_list' %}?category={{ cat.slug }}" class="action-btn view-btn" title="Δες άρθρα">
+              <i class="fas fa-list"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" style="text-align:center; padding:32px; color:#64748b;">
+            Δεν υπάρχουν κατηγορίες. <a href="{% url 'adminpanel:category_create' %}">Δημιουργήστε μία</a>.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

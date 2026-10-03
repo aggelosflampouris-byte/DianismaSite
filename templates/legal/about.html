@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Σχετικά με Εμάς & Συντακτική Ομάδα — Dianisma.gr{% endblock %}
+{% block meta_description %}Γνωρίστε την ταυτότητα, την αποστολή και τη συντακτική ομάδα του δημοσιογραφικού ιστότοπου Dianisma.gr.{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 900px; margin: 40px auto 80px; padding: 0 20px; line-height: 1.8; color: #334155;">
+
+    <nav aria-label="Breadcrumb" style="margin-bottom: 24px; font-size: 0.85rem; color: #64748b;">
+        <a href="{% url 'index' %}" style="color: #64748b; text-decoration: none;">Αρχική</a> &rsaquo;
+        <span style="color: #0f172a; font-weight: 600;">Σχετικά με Εμάς</span>
+    </nav>
+
+    <h1 style="font-family: 'Lora', serif; font-size: 2.2rem; color: #0F172A; margin-bottom: 12px; font-weight: 700;">Σχετικά με το Dianisma.gr</h1>
+    <p style="font-size: 1.1rem; color: #A16207; font-weight: 600; margin-bottom: 32px; border-bottom: 1px solid #E2E8F0; padding-bottom: 16px;">
+        Έγκυρη ενημέρωση, τεκμηριωμένη ανάλυση και πολυφωνία στον δημόσιο διάλογο.
+    </p>
+
+    <section style="margin-bottom: 40px;">
+        <h2 style="font-size: 1.3rem; color: #0F172A; font-weight: 700; margin-bottom: 12px;">Η Αποστολή μας</h2>
+        <p>
+            Το <strong>Dianisma.gr</strong> δημιουργήθηκε με σκοπό την παροχή έγκυρης, αντικειμενικής και εμπεριστατωμένης ενημέρωσης στους τομείς της Πολιτικής, της Οικονομίας, των Κοινωνικών Ζητημάτων και της Γεωστρατηγικής Ανάλυσης. Στόχος μας είναι η προαγωγή του γόνιμου διαλόγου μέσα από αναλύσεις υψηλού επιπέδου και τεκμηριωμένες απόψεις ειδικών.
+        </p>
+    </section>
+
+    <!-- Editorial Board Section -->
+    <section style="margin-bottom: 40px;">
+        <h2 style="font-size: 1.3rem; color: #0F172A; font-weight: 700; margin-bottom: 20px;">Συντακτική Ομάδα & Διεύθυνση</h2>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px;">
+            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 20px; text-align: center;">
+                <img src="https://i.pravatar.cc/150?img=68" alt="Διευθυντής Σύνταξης" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 12px; border: 2px solid #A16207;">
+                <h3 style="font-size: 1.05rem; color: #0F172A; margin: 0 0 4px; font-weight: 700;">Δημοσιογραφική Διεύθυνση</h3>
+                <p style="font-size: 0.85rem; color: #A16207; font-weight: 600; margin-bottom: 8px;">Διευθυντής Σύνταξης</p>
+                <p style="font-size: 0.85rem; color: #64748B; margin: 0;">Υπεύθυνος για τη συντακτική γραμμή και τον έλεγχο εγκυρότητας των δημοσιευμάτων.</p>
+            </div>
+
+            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 20px; text-align: center;">
+                <img src="https://i.pravatar.cc/150?img=32" alt="Αρχισυντάκτης" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 12px; border: 2px solid #A16207;">
+                <h3 style="font-size: 1.05rem; color: #0F172A; margin: 0 0 4px; font-weight: 700;">Συντακτική Επιτροπή</h3>
+                <p style="font-size: 0.85rem; color: #A16207; font-weight: 600; margin-bottom: 8px;">Αρχισυνταξία & Ρεπορτάζ</p>
+                <p style="font-size: 0.85rem; color: #64748B; margin: 0;">Δημοσιογραφική ομάδα παρακολούθησης της επικαιρότητας και των πολιτικών εξελίξεων.</p>
+            </div>
+
+            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 20px; text-align: center;">
+                <img src="https://i.pravatar.cc/150?img=12" alt="Επιστημονικοί Συνεργάτες" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 12px; border: 2px solid #A16207;">
+                <h3 style="font-size: 1.05rem; color: #0F172A; margin: 0 0 4px; font-weight: 700;">Ειδικοί Αναλυτές</h3>
+                <p style="font-size: 0.85rem; color: #A16207; font-weight: 600; margin-bottom: 8px;">Επιστημονικοί Συνεργάτες</p>
+                <p style="font-size: 0.85rem; color: #64748B; margin: 0;">Ακαδημαϊκοί, οικονομολόγοι και ειδικοί επιστήμονες που αρθρογραφούν στο Dianisma.gr.</p>
+            </div>
+        </div>
+    </section>
+
+    <section style="margin-bottom: 32px;">
+        <h2 style="font-size: 1.3rem; color: #0F172A; font-weight: 700; margin-bottom: 12px;">Δεοντολογία & Fact-Checking</h2>
+        <p>
+            Το Dianisma.gr τηρεί αυστηρά τους κανόνες της δημοσιογραφικής δεοντολογίας. Όλα τα ρεπορτάζ διασταυρώνονται πριν τη δημοσίευση, ενώ παρέχεται άμεσο δικαίωμα απάντησης και διόρθωσης σε περίπτωση σφάλματος.
+        </p>
+    </section>
+
+</div>
+{% endblock %}

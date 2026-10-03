@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Dianisma.gr | ΠΟΛΙΤΙΚΗ - Ειδήσεις, Αναλύσεις & Θεσμοί{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/politiki.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Category Title Banner -->
+<section class="category-banner">
+    <div class="container banner-inner">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="{% url 'index' %}"><i class="fas fa-home"></i> ΑΡΧΙΚΗ</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">ΠΟΛΙΤΙΚΗ</span>
+        </nav>
+        
+        <div class="banner-headline-wrap">
+            <div class="banner-title-group">
+                <span class="banner-tag"><i class="fas fa-landmark"></i> ΚΑΤΗΓΟΡΙΑ</span>
+                <h1 class="banner-title">ΠΟΛΙΤΙΚΗ</h1>
+            </div>
+            <p class="banner-description">
+                Έγκυρη ενημέρωση, θεσμικές αναλύσεις και παρασκήνιο από το ελληνικό και ευρωπαϊκό πολιτικό γίγνεσθαι.
+            </p>
+        </div>
+
+    </div>
+</section>
+
+<!-- Main Page Layout: Content Area + Sidebar -->
+<div class="container page-content politiki-layout">
+
+    <!-- Left Main Column -->
+    <div class="main-column">
+        
+        <!-- Hero Article -->
+        {% if hero_article %}
+        <section class="hero-section">
+            <article class="hero-article-card">
+                <div class="hero-badge-row">
+                    <span class="gold-badge"><i class="fas fa-star"></i> ΚΕΝΤΡΙΚΟ ΘΕΜΑ</span>
+                    <span class="hero-date"><i class="far fa-calendar-alt"></i> {{ hero_article.created_at|date:"d F Y" }}</span>
+                </div>
+                
+                <div class="hero-text-wrap">
+                    <h2 class="hero-title">
+                        <a href="{% url 'article_detail' hero_article.slug %}">{{ hero_article.title }}</a>
+                    </h2>
+                    <p class="hero-summary">
+                        {{ hero_article.excerpt }}
+                    </p>
+                    
+                    <div class="hero-meta">
+                        <div class="author-info">
+                            <span class="author-label">ΣΥΝΤΑΞΗ:</span>
+                            <span class="author-name">{{ hero_article.display_author_name }}</span>
+                        </div>
+                        <span class="dot-separator">&middot;</span>
+                        <div class="read-info">
+                            <i class="far fa-clock"></i>
+                            <span class="read-time">{{ hero_article.read_time_minutes }} min read</span>
+                        </div>
+                        <span class="dot-separator">&middot;</span>
+                        <span class="badge-cat-label">ΠΟΛΙΤΙΚΗ ΑΝΑΛΥΣΗ</span>
+                    </div>
+                </div>
+            </article>
+        </section>
+        {% endif %}
+
+        <!-- 2-Column Grid of Articles -->
+        <section class="articles-grid-section">
+            <div class="section-title-row">
+                <h3 class="section-title">ΤΕΛΕΥΤΑΙΑ ΑΡΘΡΑ & ΡΕΠΟΡΤΑΖ</h3>
+                <span class="section-rule"></span>
+            </div>
+
+            <div class="articles-2col-grid" id="articlesGrid">
+                {% for art in articles %}
+                {% include "components/category_card.html" %}
+                {% endfor %}
+            </div>
+
+            <!-- Pagination / Load More -->
+            {% if has_next %}
+            <div class="load-more-wrap">
+                <button class="btn-load-more" id="loadMoreBtn"
+                        data-category="{{ category_slug }}"
+                        data-next-page="{{ next_page }}"
+                        data-card-type="category"
+                        data-exclude-ids="{{ exclude_ids_str }}"
+                        data-target="#articlesGrid">
+                    <span>ΠΕΡΙΣΣΟΤΕΡΑ ΠΟΛΙΤΙΚΑ ΑΡΘΡΑ</span>
+                    <i class="fas fa-arrow-down"></i>
+                </button>
+            </div>
+            {% endif %}
+        </section>
+
+    </div>
+
+    <!-- Right Sidebar Column -->
+    <aside class="sidebar-column">
+        
+        <!-- Popular Articles Widget -->
+        {% include "components/trending_widget.html" with trending_title="ΔΗΜΟΦΙΛΗ ΣΤΗΝ ΠΟΛΙΤΙΚΗ" %}
+
+    </aside>
+
+</div>
+{% endblock %}

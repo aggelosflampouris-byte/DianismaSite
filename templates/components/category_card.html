@@ -1,0 +1,24 @@
+<article class="article-box">
+  <div class="article-img-wrap">
+    <a href="{% url 'article_detail' art.slug %}">
+      <img src="{{ art.get_image_url }}" alt="{{ art.title }}" loading="lazy">
+    </a>
+    {% if art.category %}
+    <span class="gold-label">{{ art.category.name|upper }}</span>
+    {% endif %}
+  </div>
+  <div class="article-body">
+    <div class="article-top-meta">
+      <span class="post-date"><i class="far fa-clock"></i> {{ art.created_at|date:"d/m/Y" }}</span>
+      <span class="reading-badge">{{ art.read_time_minutes }} min read</span>
+    </div>
+    <h4 class="article-title">
+      <a href="{% url 'article_detail' art.slug %}">{{ art.title }}</a>
+    </h4>
+    <p class="article-summary">{{ art.excerpt|truncatechars:140 }}</p>
+    <div class="article-footer">
+      <span class="author-byline">{{ art.display_author_name }}</span>
+      <a href="{% url 'article_detail' art.slug %}" class="read-more-link">Διαβάστε <i class="fas fa-chevron-right"></i></a>
+    </div>
+  </div>
+</article>

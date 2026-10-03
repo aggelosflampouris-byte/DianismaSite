@@ -1,0 +1,102 @@
+{% extends "adminpage/base_admin.html" %}
+{% load static %}
+
+{% block title %}Ρυθμίσεις Site — DIANISMA.GR Boss Panel{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/adminpage/articles.css' %}" />
+{% endblock %}
+
+{% block breadcrumb %}
+  <a href="{% url 'adminpanel:site_settings' %}"><i class="fas fa-cog"></i> Ρυθμίσεις Site</a>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title"><i class="fas fa-sliders-h"></i> Ρυθμίσεις Πλατφόρμας</h1>
+    <p class="page-subtitle">Διαχείριση παραμέτρων SEO, Social Media &amp; Γενικών Ρυθμίσεων</p>
+  </div>
+</div>
+
+<form method="POST" action="{% url 'adminpanel:site_settings' %}" id="site-settings-form">
+  {% csrf_token %}
+
+  <div class="editorial-grid">
+    <div class="editorial-main">
+
+      <!-- General Settings Card -->
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="card-header">
+          <span class="card-title"><i class="fas fa-globe"></i> Γενικές Πληροφορίες</span>
+        </div>
+        <div class="card-body">
+          <div class="form-group">
+            <label class="form-label" for="site_title">Τίτλος Ιστότοπου</label>
+            <input class="form-control" type="text" id="site_title" name="site_title" value="DIANISMA.GR" placeholder="π.χ. DIANISMA.GR — Ενημερωτική Πύλη" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="site_slogan">Σλόγκαν / Υπότιτλος</label>
+            <input class="form-control" type="text" id="site_slogan" name="site_slogan" value="Πολιτική, Οικονομία, Κοινωνία, Αναλύσεις" placeholder="Σύντομη περιγραφή ιστότοπου" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="site_description">Meta Description (SEO)</label>
+            <textarea class="form-control" id="site_description" name="site_description" rows="3" placeholder="Περιγραφή για τις μηχανές αναζήτησης...">DIANISMA.GR — Έγκυρη ενημέρωση για την Πολιτική, την Οικονομία, την Κοινωνία και τις Αναλύσεις.</textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Social Media Links Card -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><i class="fas fa-share-alt"></i> Σύνδεσμοι Social Media</span>
+        </div>
+        <div class="card-body">
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label" for="social_facebook"><i class="fab fa-facebook"></i> Facebook URL</label>
+              <input class="form-control" type="url" id="social_facebook" name="social_facebook" value="https://facebook.com" placeholder="https://facebook.com/..." />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="social_twitter"><i class="fab fa-x-twitter"></i> X (Twitter) URL</label>
+              <input class="form-control" type="url" id="social_twitter" name="social_twitter" value="https://x.com" placeholder="https://x.com/..." />
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label" for="social_instagram"><i class="fab fa-instagram"></i> Instagram URL</label>
+              <input class="form-control" type="url" id="social_instagram" name="social_instagram" value="https://instagram.com" placeholder="https://instagram.com/..." />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="social_youtube"><i class="fab fa-youtube"></i> YouTube URL</label>
+              <input class="form-control" type="url" id="social_youtube" name="social_youtube" value="https://youtube.com" placeholder="https://youtube.com/..." />
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <aside class="publishing-sidebar">
+      <div class="sidebar-card">
+        <div class="sidebar-card-header"><i class="fas fa-save"></i> Ενέργειες</div>
+        <div class="sidebar-card-body">
+          <p style="font-size:13px; color:#64748b; margin-bottom:16px;">
+            Οι αλλαγές θα εφαρμοστούν άμεσα στις δημόσιες σελίδες του ιστότοπου.
+          </p>
+          <div class="save-actions">
+            <button type="submit" class="btn btn-gold btn-block" id="btn-save-settings">
+              <i class="fas fa-check"></i> Αποθήκευση Ρυθμίσεων
+            </button>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</form>
+
+{% endblock %}

@@ -1,0 +1,114 @@
+{% extends "adminpage/base_admin.html" %}
+{% load static %}
+
+{% block title %}Νέος Χρήστης — DIANISMA.GR Boss Panel{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/adminpage/articles.css' %}" />
+{% endblock %}
+
+{% block breadcrumb %}
+  <a href="{% url 'adminpanel:users_list' %}"><i class="fas fa-user-shield"></i> Χρήστες</a>
+  <span class="sep">›</span>
+  <span class="current">Νέος Χρήστης</span>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title"><i class="fas fa-user-plus"></i> Νέος Χρήστης / Συντάκτης</h1>
+    <p class="page-subtitle">Δημιουργία νέου λογαριασμού στην πλατφόρμα</p>
+  </div>
+  <a href="{% url 'adminpanel:users_list' %}" class="btn btn-outline" id="btn-back-users">← Πίσω</a>
+</div>
+
+<form method="POST" action="" id="user-create-form">
+  {% csrf_token %}
+
+  <div class="editorial-grid">
+    <div class="editorial-main">
+      <div class="card">
+        <div class="card-header"><span class="card-title"><i class="fas fa-id-card"></i> Στοιχεία Χρήστη</span></div>
+        <div class="card-body">
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label" for="first_name">Όνομα</label>
+              <input class="form-control" type="text" id="first_name" name="first_name"
+                     value="{{ form_data.first_name|default:'' }}" placeholder="π.χ. Γιώργος" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="last_name">Επώνυμο</label>
+              <input class="form-control" type="text" id="last_name" name="last_name"
+                     value="{{ form_data.last_name|default:'' }}" placeholder="π.χ. Παπαδόπουλος" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="username">Username <span class="required">*</span></label>
+            <input class="form-control {% if errors.username %}is-invalid{% endif %}"
+                   type="text" id="username" name="username"
+                   value="{{ form_data.username|default:'' }}" placeholder="Μοναδικό username (π.χ. gpapadopoulos)" required />
+            {% if errors.username %}<div class="form-error">⚠️ {{ errors.username }}</div>{% endif %}
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="email">Email</label>
+            <input class="form-control" type="email" id="email" name="email"
+                   value="{{ form_data.email|default:'' }}" placeholder="email@example.com" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="password">Κωδικός Πρόσβασης <span class="required">*</span></label>
+            <input class="form-control {% if errors.password %}is-invalid{% endif %}"
+                   type="password" id="password" name="password"
+                   placeholder="Τουλάχιστον 8 χαρακτήρες" required />
+            {% if errors.password %}<div class="form-error">⚠️ {{ errors.password }}</div>{% endif %}
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <aside class="publishing-sidebar">
+      <div class="sidebar-card">
+        <div class="sidebar-card-header"><i class="fas fa-shield-alt"></i> Ρόλος & Δικαιώματα</div>
+        <div class="sidebar-card-body">
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label" for="role">Ρόλος Χρήστη</label>
+            <select class="form-control" id="role" name="role">
+              <option value="author" {% if form_data.role == 'author' or not form_data.role %}selected{% endif %}>
+                👤 Author — Εγκεκριμένος Συντάκτης
+              </option>
+              <option value="editor" {% if form_data.role == 'editor' %}selected{% endif %}>
+                ✏️ Editor — Staff (Admin Panel)
+              </option>
+              <option value="superadmin" {% if form_data.role == 'superadmin' %}selected{% endif %}>
+                👑 Super Admin — Πλήρης Έλεγχος
+              </option>
+            </select>
+            <div class="role-desc" id="role-desc" style="margin-top:8px; font-size:12px; color:#64748b;">
+              Ο Author μπορεί να υποβάλλει άρθρα. Ο Editor διαχειρίζεται το Admin Panel. Ο Super Admin έχει πλήρη πρόσβαση.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-card">
+        <div class="sidebar-card-body">
+          <div class="save-actions">
+            <button type="submit" class="btn btn-gold" id="btn-create-user">
+              <i class="fas fa-user-plus"></i> Δημιουργία Χρήστη
+            </button>
+            <a href="{% url 'adminpanel:users_list' %}" class="btn btn-outline" id="btn-cancel-user">
+              ✕ Άκυρο
+            </a>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</form>
+
+{% endblock %}

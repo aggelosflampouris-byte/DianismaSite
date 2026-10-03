@@ -1,0 +1,818 @@
+{% extends "base.html" %}
+{% load static %}
+{% load article_filters %}
+
+{% block title %}Dianisma.gr | Αρχική — Ειδήσεις, Αναλύσεις & Διάλογος{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ═══════════════════════════════════════════════════════
+   HOMEPAGE LAYOUT — Self-contained critical styles
+   ═══════════════════════════════════════════════════════ */
+
+/* Page wrapper */
+.page-content { margin-top: 28px; margin-bottom: 80px; }
+
+/* ── HERO GRID ── */
+.hero-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    margin-bottom: 48px;
+    align-items: stretch;
+}
+
+.lead-article {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    border-radius: 8px;
+    overflow: hidden;
+    min-height: 520px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 36px;
+    color: #fff;
+    transition: transform 0.3s ease;
+    text-decoration: none;
+}
+.lead-article:hover { transform: scale(1.005); }
+
+.category-badge {
+    background: #A16207;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 10px;
+    display: inline-block;
+    margin-bottom: 12px;
+    letter-spacing: 1.5px;
+    border-radius: 3px;
+    text-transform: uppercase;
+}
+
+.lead-title {
+    font-size: 28px;
+    line-height: 1.3;
+    color: #fff;
+    margin-bottom: 10px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    font-family: 'Lora', serif;
+}
+
+.lead-subtitle {
+    font-size: 14px;
+    margin-bottom: 18px;
+    opacity: 0.88;
+    line-height: 1.6;
+    color: #fff;
+}
+
+.article-meta {
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    color: rgba(255,255,255,0.85);
+}
+.article-meta .separator { opacity: 0.5; }
+
+/* Secondary sidebar */
+.secondary-articles {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.secondary-card {
+    display: flex;
+    background: #fff;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+    border-left: 3px solid #A16207;
+    flex: 1;
+    min-height: 0;
+    transition: box-shadow 0.25s, transform 0.25s;
+}
+.secondary-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.12); transform: translateY(-2px); }
+
+.sec-image {
+    width: 40%;
+    flex-shrink: 0;
+    overflow: hidden;
+    position: relative;
+}
+.sec-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s;
+}
+.secondary-card:hover .sec-image img { transform: scale(1.06); }
+
+.sec-content {
+    padding: 12px 14px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+.category-text {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #A16207;
+    margin-bottom: 6px;
+    display: block;
+}
+.category-text a { color: inherit; }
+.sec-title {
+    font-size: 13px;
+    line-height: 1.4;
+    margin: 0;
+    font-family: 'Lora', serif;
+    flex: 1;
+}
+.sec-title a { color: #0F172A; text-decoration: none; }
+.sec-title a:hover { color: #A16207; }
+.bottom-cat { margin-top: 8px; font-size: 11px; color: #64748B; }
+
+/* ── MAIN + SIDEBAR LAYOUT ── */
+.content-with-sidebar {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 36px;
+    align-items: start;
+}
+.main-col { min-width: 0; }
+
+/* ── SECTION HEADER ── */
+.home-section { margin-bottom: 48px; }
+
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #E2E8F0;
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 700;
+    font-family: 'Lora', serif;
+    color: #0F172A;
+    position: relative;
+    margin: 0;
+}
+.section-title span { position: relative; }
+.section-title span::after {
+    content: '';
+    position: absolute;
+    bottom: -14px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: #A16207;
+    border-radius: 2px;
+}
+
+.section-link {
+    font-size: 12px;
+    font-weight: 600;
+    color: #A16207;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: gap 0.2s;
+}
+.section-link:hover { gap: 9px; }
+
+.section-footer { margin-top: 24px; text-align: center; }
+
+.btn-view-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: 2px solid #0F172A;
+    color: #0F172A;
+    padding: 10px 28px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    border-radius: 4px;
+    transition: all 0.25s;
+    text-transform: uppercase;
+    text-decoration: none;
+    margin: 0 4px;
+}
+.btn-view-all:hover {
+    background: #0F172A;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(15,23,42,0.2);
+}
+
+/* ════════════════════════════════════════════════════════
+   NEWS GRID — 3-column card layout
+   ════════════════════════════════════════════════════════ */
+.news-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 22px !important;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.news-card {
+    background: #ffffff !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07) !important;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    display: flex !important;
+    flex-direction: column !important;
+    border: 1px solid #F1F5F9;
+}
+.news-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 28px rgba(0,0,0,0.11) !important;
+}
+
+/* Thumbnail wrapper — fixed 16:9 ratio */
+.news-card-img-wrap {
+    display: block !important;
+    position: relative !important;
+    width: 100% !important;
+    padding-top: 56.25% !important; /* 16:9 ratio */
+    overflow: hidden !important;
+    flex-shrink: 0;
+    background: #E2E8F0;
+    text-decoration: none;
+}
+
+.news-card-img-wrap img {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+    transition: transform 0.35s ease;
+}
+.news-card:hover .news-card-img-wrap img { transform: scale(1.07); }
+
+/* Category badge overlay */
+.news-card-badge {
+    position: absolute !important;
+    bottom: 10px !important;
+    left: 10px !important;
+    background: #A16207 !important;
+    color: #fff !important;
+    font-size: 9px !important;
+    font-weight: 700 !important;
+    letter-spacing: 1px !important;
+    padding: 4px 9px !important;
+    border-radius: 3px !important;
+    text-transform: uppercase !important;
+    z-index: 2;
+}
+
+/* Card body */
+.news-card-body {
+    padding: 16px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+}
+
+.news-card-title {
+    font-size: 15px !important;
+    line-height: 1.4 !important;
+    margin-bottom: 8px !important;
+    flex: 1;
+    font-family: 'Lora', serif;
+    font-weight: 700;
+}
+.news-card-title a { color: #0F172A; text-decoration: none; }
+.news-card-title a:hover { color: #A16207; }
+
+.news-card-excerpt {
+    font-size: 13px !important;
+    color: #64748B !important;
+    line-height: 1.55 !important;
+    margin-bottom: 12px !important;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.news-card-meta {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    font-size: 11px !important;
+    color: #94A3B8 !important;
+    font-weight: 500;
+    border-top: 1px solid #F1F5F9;
+    padding-top: 10px;
+    margin-top: auto;
+    flex-wrap: wrap;
+}
+
+/* ── CATEGORY BLOCKS ── */
+.category-blocks-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    margin-bottom: 48px;
+}
+.cat-block { min-width: 0; }
+
+.cat-list { display: flex; flex-direction: column; gap: 12px; padding: 0; margin: 0; list-style: none; }
+
+.cat-list-item {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #F1F5F9;
+}
+.cat-list-item:last-child { border-bottom: none; padding-bottom: 0; }
+
+.cat-list-img {
+    width: 80px;
+    height: 56px;
+    flex-shrink: 0;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #E2E8F0;
+}
+.cat-list-img img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.3s; }
+.cat-list-item:hover .cat-list-img img { transform: scale(1.08); }
+
+.cat-list-body { flex: 1; min-width: 0; }
+.cat-list-body h3 { font-size: 14px; line-height: 1.35; margin-bottom: 4px; font-family: 'Lora', serif; }
+.cat-list-body h3 a { color: #0F172A; text-decoration: none; }
+.cat-list-body h3 a:hover { color: #A16207; }
+.cat-list-meta { font-size: 11px; color: #94A3B8; }
+
+/* ── OPINIONS CAROUSEL ── */
+.opinions-section { margin-bottom: 48px; }
+.opinions-carousel { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+
+.opinion-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 22px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border-top: 3px solid #A16207;
+    transition: transform 0.25s, box-shadow 0.25s;
+}
+.opinion-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+
+.opinion-author-wrap { display: flex; align-items: center; gap: 12px; }
+.opinion-avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #E2E8F0; flex-shrink: 0; }
+.opinion-author-name { font-size: 12px; font-weight: 700; color: #0F172A; letter-spacing: 0.5px; display: block; }
+.opinion-author-title { font-size: 11px; color: #64748B; display: block; margin-top: 2px; }
+.opinion-title { font-size: 16px; line-height: 1.4; margin: 0; font-family: 'Lora', serif; }
+.opinion-title a { color: #0F172A; text-decoration: none; }
+.opinion-title a:hover { color: #A16207; }
+.opinion-excerpt { font-size: 13px; color: #64748B; line-height: 1.55; display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; flex: 1; }
+.opinion-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 10px; border-top: 1px solid #F1F5F9; margin-top: auto; }
+
+.badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    color: #A16207;
+    border: 1px solid #A16207;
+    padding: 3px 9px;
+    border-radius: 3px;
+    letter-spacing: 0.5px;
+}
+.opinion-date { font-size: 11px; color: #94A3B8; }
+
+/* ── SIDEBAR ── */
+.sidebar-col {
+    position: sticky;
+    top: 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.sidebar-widget { background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); overflow: hidden; }
+.widget-header { background: #0F172A; padding: 12px 18px; }
+.widget-title { color: #fff; font-size: 14px; font-weight: 700; margin: 0; font-family: 'Inter', sans-serif; letter-spacing: 0.5px; }
+.widget-title i { margin-right: 6px; color: #FCD34D; }
+
+.popular-list { padding: 6px 0; list-style: none; margin: 0; }
+.popular-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-bottom: 1px solid #F8FAFC;
+    transition: background 0.2s;
+}
+.popular-item:last-child { border-bottom: none; }
+.popular-item:hover { background: #FAFAFA; }
+
+.popular-rank { font-size: 20px; font-weight: 800; color: #E2E8F0; width: 22px; text-align: center; flex-shrink: 0; line-height: 1; }
+.popular-body { flex: 1; min-width: 0; }
+.popular-cat { font-size: 9px; font-weight: 700; color: #A16207; letter-spacing: 0.8px; display: block; margin-bottom: 2px; text-transform: uppercase; }
+.popular-title { font-size: 13px; font-weight: 600; line-height: 1.35; display: block; color: #0F172A; margin-bottom: 3px; text-decoration: none; }
+.popular-title:hover { color: #A16207; }
+.popular-meta { font-size: 10px; color: #94A3B8; }
+.popular-thumb { width: 52px; height: 40px; flex-shrink: 0; border-radius: 4px; overflow: hidden; background: #E2E8F0; }
+.popular-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.cta-widget {
+    background: linear-gradient(135deg, #0F172A 0%, #1E3A5F 100%);
+    padding: 26px 20px;
+    text-align: center;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(15,23,42,0.15);
+}
+.cta-widget-title { color: #fff; font-size: 18px; margin-bottom: 10px; font-family: 'Lora', serif; }
+.cta-widget p { color: rgba(255,255,255,0.7); font-size: 13px; line-height: 1.65; margin-bottom: 18px; }
+.btn-cta {
+    display: inline-block;
+    background: #A16207;
+    color: #fff;
+    padding: 10px 22px;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    transition: background 0.2s, transform 0.2s;
+    text-decoration: none;
+}
+.btn-cta:hover { background: #CA8A04; transform: translateY(-2px); }
+
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+    .content-with-sidebar { grid-template-columns: 1fr 260px; gap: 24px; }
+    .news-grid { grid-template-columns: repeat(2, 1fr) !important; }
+    .sidebar-col { position: static; }
+}
+
+@media (max-width: 900px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .lead-article { min-height: 380px; }
+    .content-with-sidebar { grid-template-columns: 1fr; }
+    .sidebar-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; position: static; }
+    .sidebar-col .sidebar-widget:last-child { grid-column: 1 / -1; }
+    .category-blocks-row { grid-template-columns: 1fr; }
+    .opinions-carousel { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+    .page-content { margin-top: 16px; }
+    .hero-grid { gap: 14px; margin-bottom: 28px; }
+    .lead-article { min-height: 280px; padding: 20px; }
+    .lead-title { font-size: 20px; }
+    .lead-subtitle { display: none; }
+    .secondary-card { flex-direction: column; border-left: none; border-top: 3px solid #A16207; }
+    .sec-image { width: 100%; height: 130px; }
+    .news-grid { grid-template-columns: 1fr !important; }
+    .opinions-carousel { grid-template-columns: 1fr; }
+    .sidebar-col { display: flex; flex-direction: column; }
+    .category-blocks-row { gap: 20px; }
+    .section-title { font-size: 16px; }
+}
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="container page-content">
+
+  <!-- ═══════════════════════════════════════════════════════
+       HERO GRID — Featured + 3 Secondary
+  ═══════════════════════════════════════════════════════ -->
+  <section class="hero-grid">
+
+    <!-- Main Lead Article -->
+    {% if lead_article %}
+    <article class="lead-article"
+      style="background-image:
+        linear-gradient(to top,
+          rgba(15,23,42,0.92) 0%,
+          rgba(15,23,42,0.35) 55%,
+          rgba(15,23,42,0.05) 100%),
+        url('{{ lead_article.get_image_url }}');">
+      <div class="lead-content">
+        {% if lead_article.category %}
+        <span class="category-badge">{{ lead_article.category.name|upper }}</span>
+        {% endif %}
+        <h1 class="lead-title">
+          <a href="{% url 'article_detail' lead_article.slug %}" style="color:inherit;text-decoration:none;">
+            {{ lead_article.title }}
+          </a>
+        </h1>
+        <p class="lead-subtitle">{{ lead_article.excerpt|truncatewords:25 }}</p>
+        <div class="article-meta">
+          <span class="author"><i class="far fa-user"></i> {{ lead_article.display_author_name }}</span>
+          <span class="separator">&middot;</span>
+          <span><i class="far fa-clock"></i> {{ lead_article.read_time_minutes }} min read</span>
+          <span class="separator">&middot;</span>
+          <span>{{ lead_article.created_at|date:"d/m/Y" }}</span>
+        </div>
+      </div>
+    </article>
+    {% endif %}
+
+    <!-- Secondary Articles Sidebar -->
+    <aside class="secondary-articles">
+      {% for sec in secondary_articles %}
+      <article class="secondary-card">
+        <div class="sec-image">
+          <a href="{% url 'article_detail' sec.slug %}">
+            <img src="{{ sec.get_image_url }}" alt="{{ sec.title }}" loading="lazy">
+          </a>
+        </div>
+        <div class="sec-content">
+          <span class="category-text">
+            {% if sec.category %}
+            <a href="{% url 'category' sec.category.slug %}">{{ sec.category.name|upper }}</a>
+            {% endif %}
+          </span>
+          <h2 class="sec-title">
+            <a href="{% url 'article_detail' sec.slug %}">{{ sec.title }}</a>
+          </h2>
+          <span class="bottom-cat">
+            <i class="far fa-clock"></i> {{ sec.read_time_minutes }} min &nbsp;&middot;&nbsp;
+            {{ sec.created_at|date:"d M Y" }}
+          </span>
+        </div>
+      </article>
+      {% endfor %}
+    </aside>
+
+  </section><!-- /hero-grid -->
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       MAIN CONTENT + SIDEBAR LAYOUT
+  ═══════════════════════════════════════════════════════ -->
+  <div class="content-with-sidebar">
+
+    <main class="main-col">
+
+      <!-- ───────────────────────────────────────────────────
+           LATEST NEWS GRID
+      ─────────────────────────────────────────────────── -->
+      {% if latest_articles %}
+      <section class="home-section">
+        <div class="section-header">
+          <h2 class="section-title"><span>Τελευταία Νέα</span></h2>
+          <a href="{% url 'index' %}" class="section-link">Όλα τα νέα <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="news-grid" id="newsGrid">
+          {% for art in latest_articles %}
+          {% include "components/news_card.html" %}
+          {% endfor %}
+        </div>
+        {% if has_next %}
+        <div class="section-footer load-more-wrap" style="margin-top:28px;text-align:center;">
+          <button class="btn-load-more btn-view-all" id="loadMoreBtn"
+                  data-next-page="{{ next_page }}"
+                  data-card-type="news"
+                  data-exclude-ids="{{ excluded_ids_str }}"
+                  data-target="#newsGrid"
+                  style="cursor:pointer;display:inline-flex;align-items:center;gap:8px;">
+            <span>ΠΕΡΙΣΣΟΤΕΡΑ ΑΡΘΡΑ</span> <i class="fas fa-chevron-down"></i>
+          </button>
+        </div>
+        {% endif %}
+      </section>
+      {% endif %}
+
+
+      <!-- ───────────────────────────────────────────────────
+           CATEGORY BLOCKS ROW (ΠΟΛΙΤΙΚΗ + ΟΙΚΟΝΟΜΙΑ)
+      ─────────────────────────────────────────────────── -->
+      <div class="category-blocks-row">
+
+        {% if politics_articles %}
+        <section class="cat-block">
+          <div class="section-header">
+            <h2 class="section-title cat-title-politiki"><span>Πολιτική</span></h2>
+            <a href="{% url 'politiki' %}" class="section-link">Περισσότερα <i class="fas fa-arrow-right"></i></a>
+          </div>
+          <ul class="cat-list">
+            {% for art in politics_articles %}
+            <li class="cat-list-item">
+              <div class="cat-list-img">
+                <a href="{% url 'article_detail' art.slug %}">
+                  <img src="{{ art.get_image_url }}" alt="{{ art.title }}" loading="lazy">
+                </a>
+              </div>
+              <div class="cat-list-body">
+                <h3><a href="{% url 'article_detail' art.slug %}">{{ art.title }}</a></h3>
+                <span class="cat-list-meta">{{ art.created_at|date:"d M Y" }} &middot; {{ art.read_time_minutes }} min</span>
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+        </section>
+        {% endif %}
+
+        {% if economy_articles %}
+        <section class="cat-block">
+          <div class="section-header">
+            <h2 class="section-title cat-title-oikonomia"><span>Οικονομία</span></h2>
+            <a href="{% url 'oikonomia' %}" class="section-link">Περισσότερα <i class="fas fa-arrow-right"></i></a>
+          </div>
+          <ul class="cat-list">
+            {% for art in economy_articles %}
+            <li class="cat-list-item">
+              <div class="cat-list-img">
+                <a href="{% url 'article_detail' art.slug %}">
+                  <img src="{{ art.get_image_url }}" alt="{{ art.title }}" loading="lazy">
+                </a>
+              </div>
+              <div class="cat-list-body">
+                <h3><a href="{% url 'article_detail' art.slug %}">{{ art.title }}</a></h3>
+                <span class="cat-list-meta">{{ art.created_at|date:"d M Y" }} &middot; {{ art.read_time_minutes }} min</span>
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+        </section>
+        {% endif %}
+
+      </div><!-- /category-blocks-row -->
+
+
+      <!-- ───────────────────────────────────────────────────
+           CATEGORY BLOCKS ROW (ΚΟΙΝΩΝΙΑ + ΑΝΑΛΥΣΕΙΣ)
+      ─────────────────────────────────────────────────── -->
+      <div class="category-blocks-row">
+
+        {% if koinonia_articles %}
+        <section class="cat-block">
+          <div class="section-header">
+            <h2 class="section-title cat-title-koinonia"><span>Κοινωνία</span></h2>
+            <a href="{% url 'koinonia' %}" class="section-link">Περισσότερα <i class="fas fa-arrow-right"></i></a>
+          </div>
+          <ul class="cat-list">
+            {% for art in koinonia_articles %}
+            <li class="cat-list-item">
+              <div class="cat-list-img">
+                <a href="{% url 'article_detail' art.slug %}">
+                  <img src="{{ art.get_image_url }}" alt="{{ art.title }}" loading="lazy">
+                </a>
+              </div>
+              <div class="cat-list-body">
+                <h3><a href="{% url 'article_detail' art.slug %}">{{ art.title }}</a></h3>
+                <span class="cat-list-meta">{{ art.created_at|date:"d M Y" }} &middot; {{ art.read_time_minutes }} min</span>
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+        </section>
+        {% endif %}
+
+        {% if analyseis_articles %}
+        <section class="cat-block">
+          <div class="section-header">
+            <h2 class="section-title cat-title-analyseis"><span>Αναλύσεις</span></h2>
+            <a href="{% url 'analyseis' %}" class="section-link">Περισσότερα <i class="fas fa-arrow-right"></i></a>
+          </div>
+          <ul class="cat-list">
+            {% for art in analyseis_articles %}
+            <li class="cat-list-item">
+              <div class="cat-list-img">
+                <a href="{% url 'article_detail' art.slug %}">
+                  <img src="{{ art.get_image_url }}" alt="{{ art.title }}" loading="lazy">
+                </a>
+              </div>
+              <div class="cat-list-body">
+                <h3><a href="{% url 'article_detail' art.slug %}">{{ art.title }}</a></h3>
+                <span class="cat-list-meta">{{ art.created_at|date:"d M Y" }} &middot; {{ art.read_time_minutes }} min</span>
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+        </section>
+        {% endif %}
+
+      </div><!-- /category-blocks-row -->
+
+
+      <!-- ───────────────────────────────────────────────────
+           OPINIONS / ΑΠΟΨΕΙΣ CAROUSEL
+      ─────────────────────────────────────────────────── -->
+      <section class="home-section opinions-section">
+        <div class="section-header">
+          <h2 class="section-title cat-title-apopseis"><span>Απόψεις & Αρθρογραφία</span></h2>
+          <a href="{% url 'apopseis' %}" class="section-link">Όλες οι απόψεις <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="opinions-carousel">
+          {% for op in opinions %}
+          <article class="opinion-card">
+            <div class="opinion-author-wrap">
+              <img src="{{ op.display_author_avatar }}" alt="{{ op.display_author_name }}" class="opinion-avatar">
+              <div>
+                <span class="opinion-author-name">{{ op.display_author_name|upper }}</span>
+                {% if op.author_title %}<span class="opinion-author-title">{{ op.author_title }}</span>{% endif %}
+              </div>
+            </div>
+            <h3 class="opinion-title">
+              <a href="{% url 'article_detail' op.slug %}">{{ op.title }}</a>
+            </h3>
+            <p class="opinion-excerpt">{{ op.excerpt|truncatewords:20 }}</p>
+            <div class="opinion-footer">
+              {% if op.category %}<span class="badge">{{ op.category.name|upper }}</span>{% endif %}
+              <span class="opinion-date">{{ op.created_at|date:"d M Y" }}</span>
+            </div>
+          </article>
+          {% empty %}
+          <article class="opinion-card opinion-card-placeholder">
+            <div class="opinion-author-wrap">
+              <img src="https://i.pravatar.cc/150?img=11" alt="Αρθρογράφος" class="opinion-avatar">
+              <div>
+                <span class="opinion-author-name">ΜΙΧΑΗΛ ΘΕΟΔΩΡΙΔΗΣ</span>
+                <span class="opinion-author-title">Πολιτικός Αναλυτής</span>
+              </div>
+            </div>
+            <h3 class="opinion-title"><a href="{% url 'apopseis' %}">Η κοινωνική συνοχή και η δημοκρατία.</a></h3>
+            <p class="opinion-excerpt">Μια βαθιά ανάλυση για τη σχέση κοινωνίας και πολιτικής στη σύγχρονη Ελλάδα.</p>
+            <div class="opinion-footer">
+              <span class="badge">ΑΠΟΨΗ</span>
+            </div>
+          </article>
+          {% endfor %}
+        </div>
+        <div class="section-footer">
+          <a href="{% url 'apopseis' %}" class="btn-view-all">Δείτε περισσότερα <i class="fas fa-chevron-right"></i></a>
+        </div>
+      </section>
+
+    </main><!-- /main-col -->
+
+
+    <!-- ─────────────────────────────────────────────────────
+         SIDEBAR — Popular Articles
+    ───────────────────────────────────────────────────── -->
+    <aside class="sidebar-col">
+
+      <div class="sidebar-widget">
+        <div class="widget-header">
+          <h3 class="widget-title"><i class="fas fa-fire"></i> Δημοφιλή</h3>
+        </div>
+        <ol class="popular-list">
+          {% for art in popular_articles %}
+          <li class="popular-item">
+            <span class="popular-rank">{{ forloop.counter }}</span>
+            <div class="popular-body">
+              {% if art.category %}
+              <span class="popular-cat">{{ art.category.name|upper }}</span>
+              {% endif %}
+              <a href="{% url 'article_detail' art.slug %}" class="popular-title">{{ art.title|truncatewords:10 }}</a>
+              <span class="popular-meta">{{ art.created_at|date:"d/m/Y" }}</span>
+            </div>
+            <div class="popular-thumb">
+              <a href="{% url 'article_detail' art.slug %}">
+                <img src="{{ art.get_image_url }}" alt="{{ art.title }}" loading="lazy">
+              </a>
+            </div>
+          </li>
+          {% endfor %}
+        </ol>
+      </div>
+
+      <!-- CTA Widget -->
+      <div class="sidebar-widget cta-widget">
+        <h3 class="cta-widget-title">Γίνε Αρθρογράφος</h3>
+        <p>Εκφράσου, ανάλυσε, διαλέξου. Μοιράσου την άποψή σου με την κοινότητα του Dianisma.</p>
+        <a href="{% url 'apply_writer' %}" class="btn-cta">Υποβολή Αίτησης</a>
+      </div>
+
+    </aside><!-- /sidebar-col -->
+
+  </div><!-- /content-with-sidebar -->
+
+</div><!-- /container -->
+{% endblock %}

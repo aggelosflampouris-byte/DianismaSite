@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Επικοινωνία & Ταυτότητα Ιστότοπου — Dianisma.gr{% endblock %}
+{% block meta_description %}Επικοινωνήστε με τη συντακτική ομάδα του Dianisma.gr. Στοιχεία επικοινωνίας, διεύθυνση και φόρμα επικοινωνίας.{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 1000px; margin: 40px auto 80px; padding: 0 20px;">
+
+    <nav aria-label="Breadcrumb" style="margin-bottom: 24px; font-size: 0.85rem; color: #64748b;">
+        <a href="{% url 'index' %}" style="color: #64748b; text-decoration: none;">Αρχική</a> &rsaquo;
+        <span style="color: #0f172a; font-weight: 600;">Επικοινωνία</span>
+    </nav>
+
+    <h1 style="font-family: 'Lora', serif; font-size: 2.2rem; color: #0F172A; margin-bottom: 12px; font-weight: 700;">Επικοινωνία & Ταυτότητα Ιστότοπου</h1>
+    <p style="font-size: 1rem; color: #64748B; margin-bottom: 36px;">
+        Έχετε ερωτήσεις, σχόλια ή επιθυμείτε να υποβάλετε ένα άρθρο/δελτίο τύπου; Επικοινωνήστε μαζί μας.
+    </p>
+
+    <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 40px; align-items: start;">
+
+        <!-- Left Column: Contact Info & Site Identity -->
+        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 32px;">
+            <h2 style="font-size: 1.25rem; color: #0F172A; font-weight: 700; margin-bottom: 20px; border-bottom: 2px solid #A16207; padding-bottom: 8px;">
+                Στοιχεία Ιδιοκτησίας & Σύνταξης
+            </h2>
+
+            <div style="display: flex; flex-direction: column; gap: 18px; font-size: 0.95rem; color: #334155;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <i class="fas fa-building" style="color: #A16207; width: 20px;"></i>
+                    <div>
+                        <strong>Ιδιοκτησία / Έκδοση:</strong> Dianisma Digital Media Ltd.
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <i class="fas fa-user-tie" style="color: #A16207; width: 20px;"></i>
+                    <div>
+                        <strong>Διευθυντής Σύνταξης:</strong> Συντακτική Επιτροπή Dianisma
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <i class="fas fa-envelope" style="color: #A16207; width: 20px;"></i>
+                    <div>
+                        <strong>Email Γενικής Επικοινωνίας:</strong> <a href="mailto:info@dianisma.gr" style="color: #A16207;">info@dianisma.gr</a>
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <i class="fas fa-newspaper" style="color: #A16207; width: 20px;"></i>
+                    <div>
+                        <strong>Δελτία Τύπου / Άρθρα:</strong> <a href="mailto:editor@dianisma.gr" style="color: #A16207;">editor@dianisma.gr</a>
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <i class="fas fa-map-marker-alt" style="color: #A16207; width: 20px;"></i>
+                    <div>
+                        <strong>Έδρα:</strong> Αθήνα, Ελλάδα
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Contact Form -->
+        <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 32px; box-shadow: 0 4px 16px rgba(0,0,0,0.04);">
+            <h2 style="font-size: 1.25rem; color: #0F172A; font-weight: 700; margin-bottom: 20px;">
+                Στείλτε μας Μήνυμα
+            </h2>
+
+            <form method="POST" action="{% url 'contact' %}">
+                {% csrf_token %}
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 0.88rem; font-weight: 600; color: #0F172A; margin-bottom: 6px;">Ονοματεπώνυμο *</label>
+                    <input type="text" name="name" required placeholder="Το ονοματεπώνυμό σας"
+                           style="width: 100%; padding: 10px 14px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 0.95rem; outline: none;">
+                </div>
+
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 0.88rem; font-weight: 600; color: #0F172A; margin-bottom: 6px;">Email Επικοινωνίας *</label>
+                    <input type="email" name="email" required placeholder="name@example.com"
+                           style="width: 100%; padding: 10px 14px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 0.95rem; outline: none;">
+                </div>
+
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 0.88rem; font-weight: 600; color: #0F172A; margin-bottom: 6px;">Θέμα</label>
+                    <input type="text" name="subject" placeholder="Θέμα μηνύματος"
+                           style="width: 100%; padding: 10px 14px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 0.95rem; outline: none;">
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-size: 0.88rem; font-weight: 600; color: #0F172A; margin-bottom: 6px;">Μήνυμα *</label>
+                    <textarea name="message" rows="5" required placeholder="Γράψτε το μήνυμά σας εδώ..."
+                              style="width: 100%; padding: 10px 14px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 0.95rem; outline: none; resize: vertical;"></textarea>
+                </div>
+
+                <button type="submit" style="width: 100%; padding: 12px; background: #0F172A; color: #fff; border: none; border-radius: 6px; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: background 0.2s;">
+                    <i class="fas fa-paper-plane" style="margin-right: 6px;"></i> Αποστολή Μηνύματος
+                </button>
+            </form>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
