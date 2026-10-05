@@ -1,15 +1,15 @@
 """
 Central URL configuration for dianisma_project.
 """
-from django.urls import path, include, re_path
+from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic.base import RedirectView
 
 urlpatterns = [
-    # 1. Redirect default Django Admin (/admin/) to Custom Admin Dashboard (/adminpanel/)
-    path('admin/', RedirectView.as_view(url='/adminpanel/', permanent=True)),
-    re_path(r'^admin/.*$', RedirectView.as_view(url='/adminpanel/', permanent=True)),
+    # Redirect default Django Admin (/admin/) to Custom Admin Dashboard (/adminpanel/).
+    # Uses 302 (temporary) to avoid the browser permanently caching this redirect.
+    path('admin/', RedirectView.as_view(url='/adminpanel/', permanent=False)),
 
     # 2. Custom Admin Dashboard
     path('adminpanel/', include('adminpanel.urls', namespace='adminpanel')),

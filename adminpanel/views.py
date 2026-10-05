@@ -2,6 +2,8 @@
 Django views for DIANISMA.GR Custom Boss Admin Dashboard (/adminpanel/).
 Full CMS: articles, users, categories, activity log, settings.
 """
+import uuid
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
@@ -13,6 +15,60 @@ from django.http import JsonResponse
 from .models import Article, Category, AuthorApplication, Profile
 
 User = get_user_model()
+
+
+def _parse_article_post(post: dict, files, existing_pdf=None) -> tuple:
+    """
+    Parse and validate article POST data shared by article_create and article_edit.
+
+    Args:
+        post: request.POST QueryDict.
+        files: request.FILES QueryDict.
+        existing_pdf: The existing pdf_file on the article being edited, or None
+                      when creating a new article.
+
+    Returns:
+        (parsed: dict, errors: dict) — errors is empty when validation passes.
+    """
+    errors: dict = {}
+
+    title = post.get('title', '').strip()
+    cat_slug = post.get('category', '').strip()
+    author_name = post.get('author_name', '').strip()
+    excerpt = post.get('excerpt', '').strip()
+    content = post.get('content', '').strip()
+    lead_image_url = post.get('lead_image_url', '').strip()
+    status_val = post.get('status', Article.STATUS_DRAFT).strip()
+    is_featured = post.get('is_featured') == 'on'
+
+    try:
+        read_time = int(post.get('read_time_minutes', 5))
+    except (ValueError, TypeError):
+        read_time = 5
+
+    if not title:
+        errors['title'] = 'Ο τίτλος είναι υποχρεωτικός.'
+    if not excerpt:
+        errors['excerpt'] = 'Η σύνοψη είναι υποχρεωτική.'
+    if not content and not files.get('pdf_file') and not existing_pdf:
+        errors['content'] = 'Το κυρίως κείμενο ή το PDF είναι υποχρεωτικό.'
+
+    category = Category.objects.filter(slug=cat_slug).first()
+    if not category:
+        errors['category'] = 'Επιλέξτε έγκυρη κατηγορία.'
+
+    parsed = {
+        'title': title,
+        'category': category,
+        'author_name': author_name,
+        'excerpt': excerpt,
+        'content': content,
+        'lead_image_url': lead_image_url,
+        'status_val': status_val,
+        'is_featured': is_featured,
+        'read_time': read_time,
+    }
+    return parsed, errors
 
 
 # ─── Auth ──────────────────────────────────────────────────────────────────────
@@ -149,44 +205,22 @@ def article_create(request):
     errors = {}
 
     if request.method == 'POST':
-        title = request.POST.get('title', '').strip()
-        cat_slug = request.POST.get('category', '').strip()
-        author_name = request.POST.get('author_name', '').strip()
-        excerpt = request.POST.get('excerpt', '').strip()
-        content = request.POST.get('content', '').strip()
-        lead_image_url = request.POST.get('lead_image_url', '').strip()
-        status_val = request.POST.get('status', Article.STATUS_DRAFT).strip()
-        is_featured = request.POST.get('is_featured') == 'on'
-        try:
-            read_time = int(request.POST.get('read_time_minutes', 5))
-        except ValueError:
-            read_time = 5
-
-        if not title:
-            errors['title'] = 'Ο τίτλος είναι υποχρεωτικός.'
-        if not excerpt:
-            errors['excerpt'] = 'Η σύνοψη είναι υποχρεωτική.'
-        if not content and not request.FILES.get('pdf_file'):
-            errors['content'] = 'Το κυρίως κείμενο ή το PDF είναι υποχρεωτικό.'
-
-        category = Category.objects.filter(slug=cat_slug).first()
-        if not category:
-            errors['category'] = 'Επιλέξτε έγκυρη κατηγορία.'
+        parsed, errors = _parse_article_post(request.POST, request.FILES)
 
         if not errors:
             article = Article.objects.create(
-                title=title,
-                category=category,
+                title=parsed['title'],
+                category=parsed['category'],
                 author=request.user,
-                author_name=author_name or request.user.get_full_name() or request.user.username,
-                excerpt=excerpt,
-                content=content,
+                author_name=parsed['author_name'] or request.user.get_full_name() or request.user.username,
+                excerpt=parsed['excerpt'],
+                content=parsed['content'],
                 pdf_file=request.FILES.get('pdf_file'),
-                lead_image_url=lead_image_url,
-                read_time_minutes=read_time,
-                status=status_val,
-                is_featured=is_featured,
-                published_at=timezone.now() if status_val == Article.STATUS_PUBLISHED else None,
+                lead_image_url=parsed['lead_image_url'],
+                read_time_minutes=parsed['read_time'],
+                status=parsed['status_val'],
+                is_featured=parsed['is_featured'],
+                published_at=timezone.now() if parsed['status_val'] == Article.STATUS_PUBLISHED else None,
             )
             messages.success(request, f'Το άρθρο «{article.title}» δημιουργήθηκε επιτυχώς!')
             return redirect('adminpanel:articles_list')
@@ -209,44 +243,24 @@ def article_edit(request, article_id):
     errors = {}
 
     if request.method == 'POST':
-        title = request.POST.get('title', '').strip()
-        cat_slug = request.POST.get('category', '').strip()
-        author_name = request.POST.get('author_name', '').strip()
-        excerpt = request.POST.get('excerpt', '').strip()
-        content = request.POST.get('content', '').strip()
-        lead_image_url = request.POST.get('lead_image_url', '').strip()
-        status_val = request.POST.get('status', article.status).strip()
-        is_featured = request.POST.get('is_featured') == 'on'
-        try:
-            read_time = int(request.POST.get('read_time_minutes', 5))
-        except ValueError:
-            read_time = 5
-
-        if not title:
-            errors['title'] = 'Ο τίτλος είναι υποχρεωτικός.'
-        if not excerpt:
-            errors['excerpt'] = 'Η σύνοψη είναι υποχρεωτική.'
-        if not content and not request.FILES.get('pdf_file') and not article.pdf_file:
-            errors['content'] = 'Το κυρίως κείμενο ή το PDF είναι υποχρεωτικό.'
-
-        category = Category.objects.filter(slug=cat_slug).first()
-        if not category:
-            errors['category'] = 'Επιλέξτε έγκυρη κατηγορία.'
+        parsed, errors = _parse_article_post(
+            request.POST, request.FILES, existing_pdf=article.pdf_file
+        )
 
         if not errors:
-            article.title = title
-            article.category = category
-            if author_name:
-                article.author_name = author_name
-            article.excerpt = excerpt
-            article.content = content
+            article.title = parsed['title']
+            article.category = parsed['category']
+            if parsed['author_name']:
+                article.author_name = parsed['author_name']
+            article.excerpt = parsed['excerpt']
+            article.content = parsed['content']
             if 'pdf_file' in request.FILES:
                 article.pdf_file = request.FILES['pdf_file']
-            article.lead_image_url = lead_image_url
-            article.read_time_minutes = read_time
-            article.status = status_val
-            article.is_featured = is_featured
-            if status_val == Article.STATUS_PUBLISHED and not article.published_at:
+            article.lead_image_url = parsed['lead_image_url']
+            article.read_time_minutes = parsed['read_time']
+            article.status = parsed['status_val']
+            article.is_featured = parsed['is_featured']
+            if parsed['status_val'] == Article.STATUS_PUBLISHED and not article.published_at:
                 article.published_at = timezone.now()
             article.save()
             messages.success(request, f'Το άρθρο «{article.title}» ενημερώθηκε!')
@@ -367,12 +381,22 @@ def author_review(request, app_id):
             application.save()
 
             if decision == 'approved':
+                # Derive a unique username from the email prefix, avoiding collisions.
+                base_username = application.email.split('@')[0]
+                username = base_username
+                while User.objects.filter(username=username).exists():
+                    username = f"{base_username}_{uuid.uuid4().hex[:6]}"
+
                 user, _ = User.objects.get_or_create(
                     email=application.email,
                     defaults={
-                        'username': application.email.split('@')[0],
+                        'username': username,
                         'first_name': application.full_name.split()[0],
-                        'last_name': " ".join(application.full_name.split()[1:]) if len(application.full_name.split()) > 1 else '',
+                        'last_name': (
+                            " ".join(application.full_name.split()[1:])
+                            if len(application.full_name.split()) > 1
+                            else ''
+                        ),
                     }
                 )
                 profile, _ = Profile.objects.get_or_create(user=user)

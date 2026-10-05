@@ -39,6 +39,10 @@ class ArticleAdmin(admin.ModelAdmin):
 
     @admin.action(description='Δημοσίευση επιλεγμένων άρθρων')
     def publish_articles(self, request, queryset):
+        from django.utils import timezone
+        now = timezone.now()
+        # Set published_at for articles that don't yet have it, mirroring Article.save() logic.
+        queryset.filter(published_at__isnull=True).update(published_at=now)
         queryset.update(status=Article.STATUS_PUBLISHED)
 
     @admin.action(description='Μετατροπή σε Πρόχειρα')

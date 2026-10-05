@@ -1,18 +1,25 @@
 """
 Views for DIANISMA.GR public portal and contributor interactions.
 """
-from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse
+import logging
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import F
-from adminpanel.models import Category, Article, Profile, AuthorApplication
+from django.core.paginator import Paginator
+from django.db.models import F, Q
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.template import TemplateDoesNotExist
+from django.template.loader import get_template, render_to_string
+
+from adminpanel.models import Article, AuthorApplication, Category, Profile
 from .forms import WriterApplicationForm, WriterArticleSubmitForm
+
+logger = logging.getLogger(__name__)
 
 
 def index(request):
     """Homepage view with editorial hero grid and rich category feeds."""
-    from django.core.paginator import Paginator
 
     published = Article.objects.filter(status=Article.STATUS_PUBLISHED).select_related('category')
 
@@ -67,7 +74,6 @@ def index(request):
 
 def category_view(request, slug, template_name):
     """Generic category view helper with 12-article initial pagination."""
-    from django.core.paginator import Paginator
 
     category = Category.objects.filter(slug=slug).first()
     published = Article.objects.filter(status=Article.STATUS_PUBLISHED)
@@ -112,8 +118,6 @@ def load_more_articles(request):
     AJAX endpoint for loading next batch of 12 articles dynamically.
     Returns rendered HTML cards and pagination metadata in JSON format.
     """
-    from django.core.paginator import Paginator
-    from django.template.loader import render_to_string
 
     MAX_PAGE_SIZE = 48  # hard cap to prevent DoS via large page requests
 
@@ -172,7 +176,6 @@ def search(request):
     results = []
     
     if query:
-        from django.db.models import Q
         results = published.filter(
             Q(title__icontains=query) |
             Q(excerpt__icontains=query) |
@@ -211,37 +214,18 @@ def apopseis(request):
 
 
 def category_generic(request, slug):
-    """Generic fallback view for any category slug (e.g. technologia, sports, etc.)."""
-    category = get_object_or_404(Category, slug=slug)
-    published = Article.objects.filter(status=Article.STATUS_PUBLISHED)
-    category_articles = published.filter(category=category)
+    """Generic fallback view for any category slug.
 
-    hero_article = category_articles.filter(is_featured=True).first() or category_articles.first()
-    other_articles = category_articles.exclude(id=hero_article.id if hero_article else 0)
-
-    cat_popular = list(category_articles.order_by('-views_count')[:5])
-    if len(cat_popular) < 5:
-        existing_ids = [a.id for a in cat_popular]
-        global_popular = list(published.exclude(id__in=existing_ids).order_by('-views_count')[:5 - len(cat_popular)])
-        popular = cat_popular + global_popular
-    else:
-        popular = cat_popular
-
-    context = {
-        'category': category,
-        'hero_article': hero_article,
-        'articles': other_articles,
-        'popular_articles': popular,
-    }
-    # Try to use a dedicated template; fall back to the politiki template layout
-    from django.template.loader import get_template
-    from django.template import TemplateDoesNotExist
+    Resolves the appropriate template (dedicated or politiki fallback) then
+    delegates entirely to category_view, eliminating duplicated hero/popular logic.
+    """
+    get_object_or_404(Category, slug=slug)  # 404 on unknown slug before any DB work
     try:
         get_template(f'{slug}.html')
         template = f'{slug}.html'
     except TemplateDoesNotExist:
         template = 'politiki.html'
-    return render(request, template, context)
+    return category_view(request, slug, template)
 
 
 def apply_writer(request):
@@ -335,7 +319,6 @@ def article_detail(request, slug):
 
 def robots_txt(request):
     """Serve dynamic robots.txt file pointing to sitemap.xml."""
-    from django.http import HttpResponse
     host = request.get_host()
     scheme = request.scheme
     content = f"User-agent: *\nAllow: /\nDisallow: /adminpanel/\nDisallow: /admin/\n\nSitemap: {scheme}://{host}/sitemap.xml\n"
@@ -380,8 +363,6 @@ def contact(request):
     TODO: Replace the logger call with Django send_mail / a ContactMessage
     model once the email backend or persistence layer is configured.
     """
-    import logging
-    logger = logging.getLogger(__name__)
 
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
