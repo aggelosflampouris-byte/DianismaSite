@@ -2,15 +2,30 @@
 Django settings for DIANISMA.GR news portal project.
 """
 from pathlib import Path
+from django.core.exceptions import ImproperlyConfigured
 import os
+
+# Load .env file for local development (requires python-dotenv, ignored silently if absent).
+try:
+    from dotenv import load_dotenv
+    load_dotenv(Path(__file__).resolve().parent.parent / '.env')
+except ImportError:
+    pass
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-dianisma-site-production-key-2024')
+_secret_key = os.environ.get('DJANGO_SECRET_KEY')
+if not _secret_key:
+    raise ImproperlyConfigured(
+        "DJANGO_SECRET_KEY environment variable is not set. "
+        "Generate one with: python -c \"from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())\""
+    )
+SECRET_KEY = _secret_key
 
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['*']
+_allowed_hosts = os.environ.get('DJANGO_ALLOWED_HOSTS', '')
+ALLOWED_HOSTS = [h.strip() for h in _allowed_hosts.split(',') if h.strip()] if _allowed_hosts else (['localhost', '127.0.0.1'] if DEBUG else [])
 
 INSTALLED_APPS = [
     'django.contrib.admin',

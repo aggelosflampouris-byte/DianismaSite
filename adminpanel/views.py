@@ -45,7 +45,9 @@ def login_view(request):
 
 
 def logout_view(request):
-    """Custom admin logout view."""
+    """Custom admin logout view. Requires POST to prevent CSRF-based logout via GET."""
+    if request.method != 'POST':
+        return redirect('adminpanel:dashboard')
     auth_logout(request)
     return redirect('adminpanel:login')
 
@@ -569,13 +571,19 @@ def category_edit(request, cat_id):
 
 @staff_member_required(login_url='/adminpanel/login/')
 def site_settings(request):
-    """Global site settings page (SEO, social, layout)."""
+    """Global site settings page (SEO, social, layout).
+
+    NOTE: Persistence is not yet implemented. POST requests are rejected
+    with a clear error until a SiteSettings model or similar backing store
+    is added.
+    """
     if not request.user.is_superuser:
         messages.error(request, 'Μόνο ο Super Admin έχει πρόσβαση στις ρυθμίσεις.')
         return redirect('adminpanel:dashboard')
 
     if request.method == 'POST':
-        messages.success(request, 'Οι ρυθμίσεις αποθηκεύτηκαν επιτυχώς.')
+        # TODO: Implement a SiteSettings model and persist values here.
+        messages.error(request, 'Η αποθήκευση ρυθμίσεων δεν είναι ακόμη διαθέσιμη.')
         return redirect('adminpanel:site_settings')
 
     return render(request, 'adminpage/site_settings.html', {

@@ -115,11 +115,20 @@ def load_more_articles(request):
     from django.core.paginator import Paginator
     from django.template.loader import render_to_string
 
+    MAX_PAGE_SIZE = 48  # hard cap to prevent DoS via large page requests
+
     category_slug = request.GET.get('category', '').strip()
-    page_num = int(request.GET.get('page', 2))
-    page_size = int(request.GET.get('page_size', 12))
     card_type = request.GET.get('card_type', 'category').strip()  # 'news' or 'category'
     exclude_ids_raw = request.GET.get('exclude_ids', '').strip()
+
+    try:
+        page_num = int(request.GET.get('page', 2))
+        page_size = min(int(request.GET.get('page_size', 12)), MAX_PAGE_SIZE)
+    except (ValueError, TypeError):
+        return JsonResponse({'success': False, 'error': 'Invalid page or page_size parameter.'}, status=400)
+
+    if page_num < 1:
+        page_num = 1
 
     exclude_ids = []
     if exclude_ids_raw:
@@ -142,10 +151,10 @@ def load_more_articles(request):
 
     template_name = 'components/news_card.html' if card_type == 'news' else 'components/category_card.html'
 
-    cards_html = []
-    for art in page_obj:
-        card = render_to_string(template_name, {'art': art}, request=request)
-        cards_html.append(card)
+    cards_html = [
+        render_to_string(template_name, {'art': art}, request=request)
+        for art in page_obj
+    ]
 
     return JsonResponse({
         'success': True,
@@ -366,7 +375,14 @@ def about(request):
 
 
 def contact(request):
-    """Contact page & Form handler."""
+    """Contact page & Form handler.
+
+    TODO: Replace the logger call with Django send_mail / a ContactMessage
+    model once the email backend or persistence layer is configured.
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
         email = request.POST.get('email', '').strip()
@@ -374,7 +390,18 @@ def contact(request):
         message_text = request.POST.get('message', '').strip()
 
         if name and email and message_text:
-            messages.success(request, 'Το μήνυμά σας απεστάλη επιτυχώς! Η συντακτική ομάδα θα επικοινωνήσει μαζί σας σύντομα.')
+            # Log the contact request so it is not silently lost.
+            # Replace this with send_mail() or a ContactMessage.objects.create() call.
+            logger.info(
+                "Contact form submission — from: %s <%s>, subject: %r",
+                name,
+                email,
+                subject or '(no subject)',
+            )
+            messages.warning(
+                request,
+                'Το μήνυμά σας ελήφθη αλλά η αποστολή email δεν είναι ακόμη διαθέσιμη. Επικοινωνήστε μαζί μας απευθείας στο email.'
+            )
             return redirect('contact')
         else:
             messages.error(request, 'Παρακαλούμε συμπληρώστε όλα τα απαιτούμενα πεδία της φόρμας.')
