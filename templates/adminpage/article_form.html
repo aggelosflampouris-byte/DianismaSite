@@ -267,4 +267,32 @@
   </div>
 </form>
 
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const form = document.getElementById('article-form');
+  if (!form) return;
+
+  const btnPrimary = document.getElementById('btn-save-primary');
+  const btnDraft = document.getElementById('btn-save-draft');
+
+  form.addEventListener('submit', function (e) {
+    if (form.dataset.submitting === 'true') {
+      e.preventDefault();
+      return false;
+    }
+
+    form.dataset.submitting = 'true';
+
+    // Disable buttons and show processing indicator to prevent duplicate clicks
+    if (btnPrimary) {
+      btnPrimary.disabled = true;
+      btnPrimary.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Αποθήκευση...';
+    }
+    if (btnDraft) {
+      btnDraft.disabled = true;
+    }
+  });
+});
+</script>
+
 {% endblock %}

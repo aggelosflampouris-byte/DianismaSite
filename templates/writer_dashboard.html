@@ -99,7 +99,7 @@ table th, table td {
         <h3>Νέα Υποβολή Άρθρου</h3>
         <p class="text-muted" style="margin-bottom: 20px;">Μπορείτε να εισάγετε το κείμενο απευθείας ή να ανεβάσετε έγγραφο (PDF / Word .docx) για αυτόματη εξαγωγή περιεχομένου.</p>
         
-        <form method="POST" action="{% url 'writer_dashboard' %}" enctype="multipart/form-data">
+        <form method="POST" action="{% url 'writer_dashboard' %}" enctype="multipart/form-data" id="writer-article-form">
             {% csrf_token %}
             
             {% for field in form %}
@@ -122,10 +122,30 @@ table th, table td {
             {% endif %}
 
             <div style="margin-top: 20px;">
-                <button type="submit" class="btn-submit">Υποβολή Άρθρου</button>
+                <button type="submit" class="btn-submit" id="btn-submit-writer">Υποβολή Άρθρου</button>
             </div>
         </form>
     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('writer-article-form');
+        const submitBtn = document.getElementById('btn-submit-writer');
+        if (!form) return;
+
+        form.addEventListener('submit', function (e) {
+            if (form.dataset.submitting === 'true') {
+                e.preventDefault();
+                return false;
+            }
+            form.dataset.submitting = 'true';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerText = 'Υποβολή σε εξέλιξη...';
+            }
+        });
+    });
+    </script>
 
     <div class="dashboard-card">
         <h3>Οι Υποβολές Μου</h3>
