@@ -103,9 +103,7 @@ def login_view(request):
 
 
 def logout_view(request):
-    """Custom admin logout view. Requires POST to prevent CSRF-based logout via GET."""
-    if request.method != 'POST':
-        return redirect('adminpanel:dashboard')
+    """Custom admin logout view. Logs out the user and redirects to login."""
     auth_logout(request)
     return redirect('adminpanel:login')
 
