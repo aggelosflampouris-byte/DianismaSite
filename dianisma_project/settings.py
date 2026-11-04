@@ -116,13 +116,14 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # WhiteNoise: compress and cache static files for production.
+_has_cloudinary = bool(os.environ.get('CLOUDINARY_API_KEY'))
+
 STORAGES = {
     'staticfiles': {
         'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
     },
-    # Media files (uploaded images) go to Cloudinary.
     'default': {
-        'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage',
+        'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage' if _has_cloudinary else 'django.core.files.storage.FileSystemStorage',
     },
 }
 

@@ -15,6 +15,11 @@ from django.db.models import Sum, Count, Q
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 from .models import Article, Category, AuthorApplication, Profile
+from .parsers import (
+    validate_document_file,
+    validate_image_file,
+    extract_document_content,
+)
 
 User = get_user_model()
 
@@ -22,6 +27,7 @@ User = get_user_model()
 def _parse_article_post(post: dict, files, existing_pdf=None) -> tuple:
     """
     Parse and validate article POST data shared by article_create and article_edit.
+    Supports PDF & Word (.docx) documents with auto-extraction and direct image uploads.
 
     Args:
         post: request.POST QueryDict.
@@ -48,12 +54,28 @@ def _parse_article_post(post: dict, files, existing_pdf=None) -> tuple:
     except (ValueError, TypeError):
         read_time = 5
 
+    doc_file = files.get('pdf_file')
+    if doc_file:
+        is_valid_doc, doc_err, _ = validate_document_file(doc_file)
+        if not is_valid_doc:
+            errors['pdf_file'] = doc_err
+        elif not content:
+            extracted_html = extract_document_content(doc_file)
+            if extracted_html:
+                content = extracted_html
+
+    image_file = files.get('lead_image')
+    if image_file:
+        is_valid_img, img_err = validate_image_file(image_file)
+        if not is_valid_img:
+            errors['lead_image'] = img_err
+
     if not title:
         errors['title'] = 'Ο τίτλος είναι υποχρεωτικός.'
     if not excerpt:
         errors['excerpt'] = 'Η σύνοψη είναι υποχρεωτική.'
-    if not content and not files.get('pdf_file') and not existing_pdf:
-        errors['content'] = 'Το κυρίως κείμενο ή το PDF είναι υποχρεωτικό.'
+    if not content and not doc_file and not existing_pdf:
+        errors['content'] = 'Το κυρίως κείμενο ή το έγγραφο (PDF / Word .docx) είναι υποχρεωτικό.'
 
     category = Category.objects.filter(slug=cat_slug).first()
     if not category:
@@ -66,6 +88,7 @@ def _parse_article_post(post: dict, files, existing_pdf=None) -> tuple:
         'excerpt': excerpt,
         'content': content,
         'lead_image_url': lead_image_url,
+        'lead_image': image_file,
         'status_val': status_val,
         'is_featured': is_featured,
         'read_time': read_time,
@@ -216,6 +239,7 @@ def article_create(request):
                 excerpt=parsed['excerpt'],
                 content=parsed['content'],
                 pdf_file=request.FILES.get('pdf_file'),
+                lead_image=request.FILES.get('lead_image'),
                 lead_image_url=parsed['lead_image_url'],
                 read_time_minutes=parsed['read_time'],
                 status=parsed['status_val'],
@@ -256,6 +280,8 @@ def article_edit(request, article_id):
             article.content = parsed['content']
             if 'pdf_file' in request.FILES:
                 article.pdf_file = request.FILES['pdf_file']
+            if 'lead_image' in request.FILES:
+                article.lead_image = request.FILES['lead_image']
             article.lead_image_url = parsed['lead_image_url']
             article.read_time_minutes = parsed['read_time']
             article.status = parsed['status_val']

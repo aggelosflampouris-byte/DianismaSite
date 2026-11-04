@@ -63,19 +63,22 @@
             {% endif %}
           </div>
 
-          <!-- PDF File Upload -->
+          <!-- Document File Upload (PDF / DOCX) -->
           <div class="form-group" style="margin-top: 16px;">
-            <label class="form-label" for="pdf_file">Αρχείο PDF (Προαιρετικό)</label>
+            <label class="form-label" for="pdf_file">
+              Έγγραφο Άρθρου (PDF ή Word .docx) <span style="font-size: 11px; color: #64748b; font-weight: normal;">(Προαιρετικό — Αυτόματη εξαγωγή περιεχομένου)</span>
+            </label>
             <input
-              class="form-control"
+              class="form-control {% if errors.pdf_file %}is-invalid{% endif %}"
               type="file"
               id="pdf_file"
               name="pdf_file"
-              accept="application/pdf"
+              accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             />
+            {% if errors.pdf_file %}<div class="form-error">⚠️ {{ errors.pdf_file }}</div>{% endif %}
             {% if is_edit and article.pdf_file %}
               <div style="font-size: 0.85rem; color: #64748b; margin-top: 6px;">
-                Τρέχον PDF: <a href="{{ article.pdf_file.url }}" target="_blank" style="color: var(--primary-color);">Προβολή</a>
+                Τρέχον Έγγραφο: <a href="{{ article.pdf_file.url }}" target="_blank" style="color: var(--primary-color); font-weight: 600;">Προβολή / Λήψη</a>
               </div>
             {% endif %}
           </div>
@@ -202,6 +205,22 @@
         <div class="sidebar-card-header">🖼️ Κύρια Εικόνα</div>
         <div class="sidebar-card-body">
           <div class="form-group">
+            <label class="form-label" for="lead_image">Μεταφόρτωση Αρχείου</label>
+            <input class="form-control {% if errors.lead_image %}is-invalid{% endif %}"
+                   type="file" id="lead_image" name="lead_image"
+                   accept="image/jpeg,image/png,image/webp" />
+            <small style="color: #64748b; font-size: 11px; display: block; margin-top: 4px;">Υποστηρίζονται: JPG, PNG, WebP (έως 10MB)</small>
+            {% if errors.lead_image %}<div class="form-error">⚠️ {{ errors.lead_image }}</div>{% endif %}
+            {% if is_edit and article.lead_image %}
+              <div style="margin-top: 8px;">
+                <img src="{{ article.lead_image.url }}" alt="Preview" style="max-width: 100%; border-radius: 4px; max-height: 110px; object-fit: cover;" />
+              </div>
+            {% endif %}
+          </div>
+
+          <div style="text-align: center; margin: 10px 0; font-size: 11px; color: #94a3b8; font-weight: 600;">— Ή ΕΞΩΤΕΡΙΚΟ URL —</div>
+
+          <div class="form-group" style="margin-bottom: 0;">
             <label class="form-label" for="lead_image_url">URL Εικόνας</label>
             <input class="form-control" type="url" id="lead_image_url" name="lead_image_url"
                    value="{{ form_data.lead_image_url|default:'' }}"

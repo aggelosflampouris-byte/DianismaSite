@@ -3,6 +3,11 @@ Forms for public portal and contributor interactions.
 """
 from django import forms
 from adminpanel.models import AuthorApplication, Article, Category
+from adminpanel.parsers import (
+    validate_document_file,
+    validate_image_file,
+    extract_document_content,
+)
 
 
 class WriterApplicationForm(forms.ModelForm):
@@ -78,18 +83,41 @@ class WriterArticleSubmitForm(forms.ModelForm):
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Τίτλος άρθρου...', 'required': True}),
             'excerpt': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Σύντομη περίληψη (lead paragraph)...', 'required': True}),
             'content': forms.Textarea(attrs={'class': 'form-control editor-content', 'rows': 12, 'placeholder': 'Κυρίως κείμενο του άρθρου...'}),
-            'pdf_file': forms.FileInput(attrs={'class': 'form-control', 'accept': 'application/pdf'}),
+            'pdf_file': forms.FileInput(attrs={'class': 'form-control', 'accept': '.pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document'}),
+            'lead_image': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/jpeg,image/png,image/webp'}),
             'lead_image_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://images.unsplash.com/...'}),
             'read_time_minutes': forms.NumberInput(attrs={'class': 'form-control', 'min': 1, 'max': 60, 'value': 5}),
         }
+
+    def clean_pdf_file(self):
+        doc = self.cleaned_data.get('pdf_file')
+        if doc:
+            is_valid, err_msg, _ = validate_document_file(doc)
+            if not is_valid:
+                raise forms.ValidationError(err_msg)
+        return doc
+
+    def clean_lead_image(self):
+        img = self.cleaned_data.get('lead_image')
+        if img:
+            is_valid, err_msg = validate_image_file(img)
+            if not is_valid:
+                raise forms.ValidationError(err_msg)
+        return img
 
     def clean(self):
         cleaned_data = super().clean()
         content = cleaned_data.get("content")
         pdf_file = cleaned_data.get("pdf_file")
 
+        if pdf_file and not content:
+            extracted_html = extract_document_content(pdf_file)
+            if extracted_html:
+                cleaned_data["content"] = extracted_html
+                content = extracted_html
+
         if not content and not pdf_file:
             raise forms.ValidationError(
-                "Είναι υποχρεωτικό να εισάγετε Κυρίως Κείμενο ή να ανεβάσετε Αρχείο PDF."
+                "Είναι υποχρεωτικό να εισάγετε Κυρίως Κείμενο ή να ανεβάσετε Έγγραφο (PDF / Word .docx)."
             )
         return cleaned_data
