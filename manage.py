@@ -3,6 +3,13 @@
 import os
 import sys
 
+# Apply PyMySQL as a drop-in replacement for mysqlclient (needed locally and on Vercel).
+try:
+    import pymysql
+    pymysql.install_as_MySQLdb()
+except ImportError:
+    pass
+
 
 def main():
     """Run administrative tasks."""
