@@ -2,6 +2,7 @@
 Views for DIANISMA.GR public portal and contributor interactions.
 """
 import logging
+import urllib.parse
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -324,6 +325,19 @@ def robots_txt(request):
     content = f"User-agent: *\nAllow: /\nDisallow: /adminpanel/\nDisallow: /admin/\n\nSitemap: {scheme}://{host}/sitemap.xml\n"
     return HttpResponse(content, content_type="text/plain")
 
+
+
+
+def legacy_tag_redirect(request, tag_name=''):
+    """
+    301 Permanent Redirect for legacy tag URLs (e.g. /tag/<slug>/, /tags/<slug>/).
+    Preserves SEO authority from Google index and redirects users to site search.
+    """
+    clean_tag = (tag_name or '').rstrip('/').replace('-', ' ').replace('_', ' ').strip()
+    if clean_tag:
+        query = urllib.parse.quote_plus(clean_tag)
+        return redirect(f"/search/?q={query}", permanent=True)
+    return redirect('/', permanent=True)
 
 def custom_404(request, exception=None):
     """Custom 404 error page handler."""
