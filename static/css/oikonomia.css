@@ -48,9 +48,18 @@
 
 .ticker-scroll-wrapper {
     flex: 1;
+    width: 100%;
+    height: 35px;
     overflow: hidden;
-    white-space: nowrap;
     position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.ticker-scroll-wrapper tv-tickers {
+    width: 100%;
+    height: 100%;
+    display: block;
 }
 
 .ticker-items {

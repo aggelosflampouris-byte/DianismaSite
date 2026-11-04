@@ -6,6 +6,11 @@
     <meta name="description" content="{% block meta_description %}Dianisma.gr - Έγκυρη ενημέρωση, πολιτική ανάλυση, οικονομικά νέα, κοινωνικά θέματα και απόψεις.{% endblock %}">
     <link rel="canonical" href="{% block canonical_url %}{{ request.build_absolute_uri }}{% endblock %}">
 
+    <!-- Favicon / Browser Tab Logo -->
+    <link rel="icon" type="image/jpeg" href="{% static 'images/Dianisma_-_Only_Logo.jpg' %}">
+    <link rel="shortcut icon" type="image/jpeg" href="{% static 'images/Dianisma_-_Only_Logo.jpg' %}">
+    <link rel="apple-touch-icon" href="{% static 'images/Dianisma_-_Only_Logo.jpg' %}">
+
     <!-- Open Graph / Social Media Tags -->
     {% block og_tags %}
     <meta property="og:site_name" content="Dianisma.gr">
