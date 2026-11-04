@@ -173,6 +173,11 @@ def load_more_articles(request):
 def search(request):
     """Global search view for public articles."""
     query = request.GET.get('q', '').strip()
+    if '%' in query:
+        try:
+            query = urllib.parse.unquote(query).strip()
+        except Exception:
+            pass
     published = Article.objects.filter(status=Article.STATUS_PUBLISHED)
     results = []
     
@@ -333,10 +338,15 @@ def legacy_tag_redirect(request, tag_name=''):
     301 Permanent Redirect for legacy tag URLs (e.g. /tag/<slug>/, /tags/<slug>/).
     Preserves SEO authority from Google index and redirects users to site search.
     """
-    clean_tag = (tag_name or '').rstrip('/').replace('-', ' ').replace('_', ' ').strip()
+    decoded = urllib.parse.unquote(tag_name or '')
+    while '%' in decoded:
+        new_dec = urllib.parse.unquote(decoded)
+        if new_dec == decoded:
+            break
+        decoded = new_dec
+    clean_tag = decoded.rstrip('/').replace('-', ' ').replace('_', ' ').strip()
     if clean_tag:
-        query = urllib.parse.quote_plus(clean_tag)
-        return redirect(f"/search/?q={query}", permanent=True)
+        return redirect(f"/search/?q={urllib.parse.quote(clean_tag)}", permanent=True)
     return redirect('/', permanent=True)
 
 def custom_404(request, exception=None):
