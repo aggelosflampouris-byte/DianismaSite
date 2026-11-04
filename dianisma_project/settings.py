@@ -110,7 +110,7 @@ TIME_ZONE = 'Europe/Athens'
 USE_I18N = True
 USE_TZ = True
 
-# ── Static files (CSS, JS) served by WhiteNoise ──────────────────────────────
+# â”€â”€ Static files (CSS, JS) served by WhiteNoise â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
@@ -126,9 +126,9 @@ STORAGES = {
     },
 }
 
-# ── Cloudinary (media / uploaded images) ─────────────────────────────────────
+# â”€â”€ Cloudinary (media / uploaded images) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', 'dianisma'),
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', 'dh7aqmruq'),
     'API_KEY':    os.environ.get('CLOUDINARY_API_KEY', ''),
     'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', ''),
 }

@@ -16,14 +16,17 @@ def clean_content(value):
       pattern produced during the pgdump import.
     - Remove standalone \\r\\n / \\n escape-looking text sequences.
     - Ensure images are contained and wrapped in figure elements.
+    - Correct legacy Cloudinary cloud name.
     """
     if not value:
         return ''
 
     content = str(value)
 
+    # Fix legacy Cloudinary cloud name in body images
+    content = content.replace('res.cloudinary.com/dianisma/', 'res.cloudinary.com/dh7aqmruq/')
+
     # Pattern 1: literal backslash-r followed by real newline char (most common from import)
-    # repr shows as \\r\n
     content = content.replace('\\\r\n', ' ')
     content = content.replace('\\\n', ' ')
     content = content.replace('\\\r', ' ')
@@ -56,7 +59,9 @@ def clean_content(value):
 
 @register.filter(name='fix_image_url')
 def fix_image_url(url):
-    """Fix Cloudinary double image/upload paths."""
+    """Fix Cloudinary double image/upload paths and legacy cloud name."""
     if not url:
         return url
-    return url.replace('image/upload/image/upload/', 'image/upload/')
+    url = url.replace('image/upload/image/upload/', 'image/upload/')
+    url = url.replace('res.cloudinary.com/dianisma/', 'res.cloudinary.com/dh7aqmruq/')
+    return url
