@@ -39,6 +39,9 @@ def clean_content(value):
     # Clean up multiple whitespace runs
     content = re.sub(r'[ \t]{3,}', ' ', content)
 
+    # Strip out base64 data URIs or raw duplicate embedded images that might have slipped into content body
+    content = re.sub(r'<img[^>]+src=["\']data:image/[^"\']+["\'][^>]*>', '', content, flags=re.IGNORECASE)
+
     # Wrap bare <img> tags in figure for better styling control
     content = re.sub(
         r'(<img\b(?![^>]*class="article-figure-img")[^>]*>)',

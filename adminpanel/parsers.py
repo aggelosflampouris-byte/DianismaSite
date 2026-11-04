@@ -80,11 +80,12 @@ def validate_image_file(uploaded_file):
 
 
 def extract_docx_content(file_obj) -> str:
-    """Extract HTML content from Word (.docx) file."""
+    """Extract HTML content from Word (.docx) file, omitting embedded images so only clean body text is extracted."""
     try:
         file_obj.seek(0)
         import mammoth
-        res = mammoth.convert_to_html(file_obj)
+        # convert_image=lambda img: [] ignores inline document images to prevent duplicates with featured lead image
+        res = mammoth.convert_to_html(file_obj, convert_image=lambda img: [])
         html = res.value.strip()
         if html:
             return html
