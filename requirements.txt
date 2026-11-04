@@ -2,3 +2,6 @@ Django==5.2.4
 PyMySQL==1.1.1
 pillow==11.2.1
 python-dotenv==1.1.0
+whitenoise==6.9.0
+cloudinary==1.42.1
+django-cloudinary-storage==0.3.0
