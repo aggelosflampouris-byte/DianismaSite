@@ -223,18 +223,22 @@ class Article(models.Model):
     @property
     def get_image_url(self):
         """Return lead_image URL, lead_image_url, or fallback image."""
+        url = ''
         if self.lead_image:
             try:
-                return self.lead_image.url
+                url = self.lead_image.url
             except Exception:
-                pass
-        if self.lead_image_url:
+                url = ''
+        if not url and self.lead_image_url:
             url = self.lead_image_url
-            if 'res.cloudinary.com/dianisma/' in url:
-                from django.conf import settings
-                cloud_name = getattr(settings, 'CLOUDINARY_STORAGE', {}).get('CLOUD_NAME') or 'dh7aqmruq'
-                url = url.replace('res.cloudinary.com/dianisma/', f'res.cloudinary.com/{cloud_name}/')
+
+        if url:
+            from django.conf import settings
+            cloud_name = getattr(settings, 'CLOUDINARY_STORAGE', {}).get('CLOUD_NAME') or 'dh7aqmruq'
+            url = url.replace('res.cloudinary.com/dianisma/', f'res.cloudinary.com/{cloud_name}/')
+            url = url.replace('image/upload/image/upload/', 'image/upload/')
             return url
+
         return 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&q=80&w=1000'
 
     @property
