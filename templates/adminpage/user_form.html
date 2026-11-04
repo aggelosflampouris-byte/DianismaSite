@@ -1,7 +1,7 @@
 {% extends "adminpage/base_admin.html" %}
 {% load static %}
 
-{% block title %}Νέος Χρήστης — DIANISMA.GR Boss Panel{% endblock %}
+{% block title %}{% if is_edit %}Επεξεργασία Χρήστη — DIANISMA.GR Boss Panel{% else %}Νέος Χρήστης — DIANISMA.GR Boss Panel{% endif %}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/adminpage/articles.css' %}" />
@@ -10,20 +10,25 @@
 {% block breadcrumb %}
   <a href="{% url 'adminpanel:users_list' %}"><i class="fas fa-user-shield"></i> Χρήστες</a>
   <span class="sep">›</span>
-  <span class="current">Νέος Χρήστης</span>
+  <span class="current">{% if is_edit %}Επεξεργασία ({{ target_user.username }}){% else %}Νέος Χρήστης{% endif %}</span>
 {% endblock %}
 
 {% block content %}
 
 <div class="page-header">
   <div>
-    <h1 class="page-title"><i class="fas fa-user-plus"></i> Νέος Χρήστης / Συντάκτης</h1>
-    <p class="page-subtitle">Δημιουργία νέου λογαριασμού στην πλατφόρμα</p>
+    <h1 class="page-title">
+      <i class="fas {% if is_edit %}fa-user-edit{% else %}fa-user-plus{% endif %}"></i>
+      {% if is_edit %}Επεξεργασία Χρήστη: {{ target_user.username }}{% else %}Νέος Χρήστης / Συντάκτης{% endif %}
+    </h1>
+    <p class="page-subtitle">
+      {% if is_edit %}Επεξεργασία στοιχείων και διαχείριση ασφάλειας λογαριασμού{% else %}Δημιουργία νέου λογαριασμού στην πλατφόρμα{% endif %}
+    </p>
   </div>
   <a href="{% url 'adminpanel:users_list' %}" class="btn btn-outline" id="btn-back-users">← Πίσω</a>
 </div>
 
-<form method="POST" action="" id="user-create-form">
+<form method="POST" action="{% if is_edit %}{% url 'adminpanel:user_edit' target_user.id %}{% else %}{% url 'adminpanel:user_create' %}{% endif %}" id="user-main-form">
   {% csrf_token %}
 
   <div class="editorial-grid">
@@ -46,10 +51,11 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="username">Username <span class="required">*</span></label>
+            <label class="form-label" for="username">Username {% if not is_edit %}<span class="required">*</span>{% endif %}</label>
             <input class="form-control {% if errors.username %}is-invalid{% endif %}"
                    type="text" id="username" name="username"
-                   value="{{ form_data.username|default:'' }}" placeholder="Μοναδικό username (π.χ. gpapadopoulos)" required />
+                   value="{{ form_data.username|default:'' }}" placeholder="Μοναδικό username (π.χ. gpapadopoulos)"
+                   {% if is_edit %}readonly style="background:#f1f5f9; cursor:not-allowed;"{% else %}required{% endif %} />
             {% if errors.username %}<div class="form-error">⚠️ {{ errors.username }}</div>{% endif %}
           </div>
 
@@ -59,6 +65,7 @@
                    value="{{ form_data.email|default:'' }}" placeholder="email@example.com" />
           </div>
 
+          {% if not is_edit %}
           <div class="form-group">
             <label class="form-label" for="password">Κωδικός Πρόσβασης <span class="required">*</span></label>
             <input class="form-control {% if errors.password %}is-invalid{% endif %}"
@@ -66,14 +73,49 @@
                    placeholder="Τουλάχιστον 8 χαρακτήρες" required />
             {% if errors.password %}<div class="form-error">⚠️ {{ errors.password }}</div>{% endif %}
           </div>
+          {% endif %}
 
         </div>
       </div>
+
+      {% if is_edit %}
+      <!-- Change Password Card -->
+      <div class="card" style="margin-top: 24px;" id="password-change-card">
+        <div class="card-header">
+          <span class="card-title"><i class="fas fa-key"></i> Αλλαγή Κωδικού Χρήστη</span>
+        </div>
+        <div class="card-body">
+          <div id="pw-alert-container"></div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label" for="new_password">Νέος Κωδικός <span class="required">*</span></label>
+              <input class="form-control" type="password" id="new_password" name="new_password"
+                     placeholder="Τουλάχιστον 8 χαρακτήρες" autocomplete="new-password" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="confirm_password">Επιβεβαίωση Νέου Κωδικού <span class="required">*</span></label>
+              <input class="form-control" type="password" id="confirm_password" name="confirm_password"
+                     placeholder="Επαναλάβετε τον κωδικό" autocomplete="new-password" />
+            </div>
+          </div>
+
+          <div style="margin-top: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+            <span style="font-size: 13px; color: #64748b;">
+              <i class="fas fa-shield-alt"></i> Ελάχιστο μήκος: 8 χαρακτήρες. Ο κωδικός αποθηκεύεται με ασφαλή κρυπτογράφηση (hashing).
+            </span>
+            <button type="button" class="btn btn-gold" id="btn-submit-change-pw">
+              <i class="fas fa-lock"></i> Αλλαγή Κωδικού
+            </button>
+          </div>
+        </div>
+      </div>
+      {% endif %}
     </div>
 
     <aside class="publishing-sidebar">
       <div class="sidebar-card">
-        <div class="sidebar-card-header"><i class="fas fa-shield-alt"></i> Ρόλος & Δικαιώματα</div>
+        <div class="sidebar-card-header"><i class="fas fa-shield-alt"></i> Ρόλος &amp; Δικαιώματα</div>
         <div class="sidebar-card-body">
           <div class="form-group" style="margin-bottom:0;">
             <label class="form-label" for="role">Ρόλος Χρήστη</label>
@@ -98,8 +140,9 @@
       <div class="sidebar-card">
         <div class="sidebar-card-body">
           <div class="save-actions">
-            <button type="submit" class="btn btn-gold" id="btn-create-user">
-              <i class="fas fa-user-plus"></i> Δημιουργία Χρήστη
+            <button type="submit" class="btn btn-gold" id="btn-save-user">
+              <i class="fas {% if is_edit %}fa-check{% else %}fa-user-plus{% endif %}"></i>
+              {% if is_edit %}Αποθήκευση Αλλαγών{% else %}Δημιουργία Χρήστη{% endif %}
             </button>
             <a href="{% url 'adminpanel:users_list' %}" class="btn btn-outline" id="btn-cancel-user">
               ✕ Άκυρο
@@ -110,5 +153,84 @@
     </aside>
   </div>
 </form>
+
+{% if is_edit %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const btnChangePw = document.getElementById('btn-submit-change-pw');
+  const newPwInput = document.getElementById('new_password');
+  const confirmPwInput = document.getElementById('confirm_password');
+  const alertContainer = document.getElementById('pw-alert-container');
+
+  function showAlert(message, type) {
+    const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+    const bg = type === 'success' ? '#ecfdf5' : '#fef2f2';
+    const border = type === 'success' ? '#a7f3d0' : '#fecaca';
+    const color = type === 'success' ? '#065f46' : '#991b1b';
+
+    alertContainer.innerHTML = `
+      <div style="margin-bottom: 16px; padding: 12px 16px; border-radius: 6px; font-size: 13px; display: flex; align-items: center; gap: 10px; background: ${bg}; border: 1px solid ${border}; color: ${color};">
+        <i class="fas ${icon}"></i>
+        <span>${message}</span>
+      </div>
+    `;
+  }
+
+  btnChangePw.addEventListener('click', async function () {
+    const newPassword = newPwInput.value.trim();
+    const confirmPassword = confirmPwInput.value.trim();
+
+    // Client-side validations
+    if (!newPassword || !confirmPassword) {
+      showAlert('Παρακαλώ συμπληρώστε και τα δύο πεδία κωδικού.', 'danger');
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      showAlert('Ο κωδικός πρόσβασης πρέπει να αποτελείται από τουλάχιστον 8 χαρακτήρες.', 'danger');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      showAlert('Οι κωδικοί πρόσβασης δεν ταιριάζουν.', 'danger');
+      return;
+    }
+
+    btnChangePw.disabled = true;
+    btnChangePw.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Επεξεργασία...';
+
+    try {
+      const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+      const response = await fetch("{% url 'adminpanel:api_user_change_password' target_user.id %}", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({
+          new_password: newPassword,
+          confirm_password: confirmPassword
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        showAlert(data.message || 'Ο κωδικός άλλαξε επιτυχώς!', 'success');
+        newPwInput.value = '';
+        confirmPwInput.value = '';
+      } else {
+        showAlert(data.error || 'Προέκυψε σφάλμα κατά την αλλαγή κωδικού.', 'danger');
+      }
+    } catch (err) {
+      showAlert('Σφάλμα επικοινωνίας με τον διακομιστή.', 'danger');
+    } finally {
+      btnChangePw.disabled = false;
+      btnChangePw.innerHTML = '<i class="fas fa-lock"></i> Αλλαγή Κωδικού';
+    }
+  });
+});
+</script>
+{% endif %}
 
 {% endblock %}

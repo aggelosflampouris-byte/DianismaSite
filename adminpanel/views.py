@@ -3,10 +3,12 @@ Django views for DIANISMA.GR Custom Boss Admin Dashboard (/adminpanel/).
 Full CMS: articles, users, categories, activity log, settings.
 """
 import uuid
+import json
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, update_session_auth_hash
+from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Sum, Count, Q
@@ -504,6 +506,108 @@ def user_create(request):
         'form_data': request.POST if request.method == 'POST' else {},
         'errors': errors,
         'active_page': 'users',
+    })
+
+
+@staff_member_required(login_url='/adminpanel/login/')
+def user_edit(request, user_id):
+    """Edit an existing user (superuser only)."""
+    if not request.user.is_superuser:
+        messages.error(request, 'Δεν έχετε δικαίωμα εκτέλεσης αυτής της ενέργειας.')
+        return redirect('adminpanel:dashboard')
+
+    target_user = get_object_or_404(User, id=user_id)
+    errors = {}
+
+    if target_user.is_superuser:
+        current_role = 'superadmin'
+    elif target_user.is_staff:
+        current_role = 'editor'
+    else:
+        current_role = 'author'
+
+    if request.method == 'POST':
+        email = request.POST.get('email', '').strip()
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        role = request.POST.get('role', current_role)
+
+        target_user.first_name = first_name
+        target_user.last_name = last_name
+        target_user.email = email
+
+        if role == 'superadmin':
+            target_user.is_superuser = True
+            target_user.is_staff = True
+        elif role == 'editor':
+            target_user.is_superuser = False
+            target_user.is_staff = True
+        else:
+            target_user.is_superuser = False
+            target_user.is_staff = False
+
+        target_user.save()
+        messages.success(request, f'Τα στοιχεία του χρήστη «{target_user.username}» ενημερώθηκαν.')
+        return redirect('adminpanel:users_list')
+
+    form_data = {
+        'username': target_user.username,
+        'email': target_user.email,
+        'first_name': target_user.first_name,
+        'last_name': target_user.last_name,
+        'role': current_role,
+    }
+
+    return render(request, 'adminpage/user_form.html', {
+        'is_edit': True,
+        'target_user': target_user,
+        'form_data': form_data,
+        'errors': errors,
+        'active_page': 'users',
+    })
+
+
+@staff_member_required(login_url='/adminpanel/login/')
+@require_POST
+def api_user_change_password(request, user_id):
+    """API endpoint: Securely change a user's password (superuser only)."""
+    if not request.user.is_superuser:
+        return JsonResponse({'success': False, 'error': 'Δεν έχετε δικαίωμα εκτέλεσης αυτής της ενέργειας.'}, status=403)
+
+    try:
+        target_user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Ο χρήστης δεν βρέθηκε.'}, status=404)
+
+    if request.content_type == 'application/json':
+        try:
+            payload = json.loads(request.body.decode('utf-8'))
+        except (ValueError, UnicodeDecodeError):
+            return JsonResponse({'success': False, 'error': 'Μη έγκυρη μορφή δεδομένων (Invalid JSON).'}, status=400)
+    else:
+        payload = request.POST
+
+    new_password = payload.get('new_password', '').strip()
+    confirm_password = payload.get('confirm_password', '').strip()
+
+    if not new_password or not confirm_password:
+        return JsonResponse({'success': False, 'error': 'Παρακαλώ συμπληρώστε και τα δύο πεδία κωδικού.'}, status=400)
+
+    if len(new_password) < 8:
+        return JsonResponse({'success': False, 'error': 'Ο κωδικός πρόσβασης πρέπει να αποτελείται από τουλάχιστον 8 χαρακτήρες.'}, status=400)
+
+    if new_password != confirm_password:
+        return JsonResponse({'success': False, 'error': 'Οι κωδικοί πρόσβασης δεν ταιριάζουν.'}, status=400)
+
+    target_user.set_password(new_password)
+    target_user.save()
+
+    if request.user.id == target_user.id:
+        update_session_auth_hash(request, target_user)
+
+    return JsonResponse({
+        'success': True,
+        'message': f'Ο κωδικός πρόσβασης για τον χρήστη «{target_user.username}» άλλαξε επιτυχώς!'
     })
 
 

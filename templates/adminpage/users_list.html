@@ -82,6 +82,9 @@
             {% else %}<span class="badge badge-rejected">🚫 Ανενεργός</span>{% endif %}
           </td>
           <td class="action-cell">
+            <a href="{% url 'adminpanel:user_edit' u.id %}" class="action-btn edit-btn" title="Επεξεργασία">
+              <i class="fas fa-edit"></i>
+            </a>
             {% if u != request.user %}
             <form method="POST" action="{% url 'adminpanel:user_toggle_active' u.id %}" style="display:inline;">
               {% csrf_token %}

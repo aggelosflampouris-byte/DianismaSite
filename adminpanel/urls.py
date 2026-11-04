@@ -31,6 +31,8 @@ urlpatterns = [
     path('users/', views.users_list, name='users_list'),
     path('users/create/', views.user_create, name='user_create'),
     path('users/<int:user_id>/toggle-active/', views.user_toggle_active, name='user_toggle_active'),
+    path('users/<int:user_id>/edit/', views.user_edit, name='user_edit'),
+    path('api/users/<int:user_id>/change-password/', views.api_user_change_password, name='api_user_change_password'),
 
     # Categories
     path('categories/', views.categories_list, name='categories_list'),
