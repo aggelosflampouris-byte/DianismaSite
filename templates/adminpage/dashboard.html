@@ -94,22 +94,22 @@
     </div>
     <div class="chart-body">
       <div class="bar-chart" id="bar-chart" aria-label="Γράφημα επισκεψιμότητας">
-        {% for label, height in day_data %}
+        {% for label, height, views in day_data %}
         <div class="bar-group">
-          <div class="bar-fill" data-height="{{ height }}" role="img" aria-label="{{ label }}: {{ height }}%">
-            <div class="bar-tooltip">{{ height }}%</div>
+          <div class="bar-fill" data-height="{{ height }}" style="height: {{ height }}%;" role="img" aria-label="{{ label }}: {{ views }} views">
+            <div class="bar-tooltip">{{ views }} προβολές</div>
           </div>
           <span class="bar-label">{{ label }}</span>
         </div>
         {% empty %}
         <!-- Fallback static bars -->
-        <div class="bar-group"><div class="bar-fill" data-height="65"><div class="bar-tooltip">Δευ</div></div><span class="bar-label">Δευ</span></div>
-        <div class="bar-group"><div class="bar-fill" data-height="80"><div class="bar-tooltip">Τρί</div></div><span class="bar-label">Τρί</span></div>
-        <div class="bar-group"><div class="bar-fill" data-height="55"><div class="bar-tooltip">Τετ</div></div><span class="bar-label">Τετ</span></div>
-        <div class="bar-group"><div class="bar-fill" data-height="90"><div class="bar-tooltip">Πέμ</div></div><span class="bar-label">Πέμ</span></div>
-        <div class="bar-group"><div class="bar-fill" data-height="75"><div class="bar-tooltip">Παρ</div></div><span class="bar-label">Παρ</span></div>
-        <div class="bar-group"><div class="bar-fill" data-height="40"><div class="bar-tooltip">Σάβ</div></div><span class="bar-label">Σάβ</span></div>
-        <div class="bar-group"><div class="bar-fill" data-height="50"><div class="bar-tooltip">Κυρ</div></div><span class="bar-label">Κυρ</span></div>
+        <div class="bar-group"><div class="bar-fill" data-height="65" style="height:65%;"><div class="bar-tooltip">65%</div></div><span class="bar-label">Δευ</span></div>
+        <div class="bar-group"><div class="bar-fill" data-height="80" style="height:80%;"><div class="bar-tooltip">80%</div></div><span class="bar-label">Τρί</span></div>
+        <div class="bar-group"><div class="bar-fill" data-height="55" style="height:55%;"><div class="bar-tooltip">55%</div></div><span class="bar-label">Τετ</span></div>
+        <div class="bar-group"><div class="bar-fill" data-height="90" style="height:90%;"><div class="bar-tooltip">90%</div></div><span class="bar-label">Πέμ</span></div>
+        <div class="bar-group"><div class="bar-fill" data-height="75" style="height:75%;"><div class="bar-tooltip">75%</div></div><span class="bar-label">Παρ</span></div>
+        <div class="bar-group"><div class="bar-fill" data-height="40" style="height:40%;"><div class="bar-tooltip">40%</div></div><span class="bar-label">Σάβ</span></div>
+        <div class="bar-group"><div class="bar-fill" data-height="50" style="height:50%;"><div class="bar-tooltip">50%</div></div><span class="bar-label">Κυρ</span></div>
         {% endfor %}
       </div>
     </div>
@@ -290,11 +290,35 @@
       el.style.width = el.dataset.width + '%';
     });
 
-    // Chart period toggle
+    // Chart period toggle and dynamic fetch
+    const chartContainer = document.getElementById('bar-chart');
     document.querySelectorAll('.chart-period-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', async () => {
+        const period = btn.dataset.period || '7d';
         document.querySelectorAll('.chart-period-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
+
+        try {
+          const res = await fetch(`{% url 'adminpanel:api_dashboard_traffic' %}?period=${period}`);
+          if (!res.ok) return;
+          const json = await res.json();
+          if (!json.success || !json.chart_data || !chartContainer) return;
+
+          chartContainer.innerHTML = '';
+          json.chart_data.forEach(item => {
+            const group = document.createElement('div');
+            group.className = 'bar-group';
+            group.innerHTML = `
+              <div class="bar-fill" data-height="${item.height}" style="height: ${item.height}%;" role="img" aria-label="${item.label}: ${item.views} views">
+                <div class="bar-tooltip">${item.views} προβολές</div>
+              </div>
+              <span class="bar-label">${item.label}</span>
+            `;
+            chartContainer.appendChild(group);
+          });
+        } catch (err) {
+          console.error('Error fetching traffic chart data:', err);
+        }
       });
     });
   });

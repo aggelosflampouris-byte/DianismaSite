@@ -13,6 +13,7 @@ urlpatterns = [
 
     # Dashboard
     path('', views.dashboard, name='dashboard'),
+    path('api/dashboard/traffic/', views.api_dashboard_traffic, name='api_dashboard_traffic'),
 
     # Articles
     path('articles/', views.articles_list, name='articles_list'),

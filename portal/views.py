@@ -298,9 +298,13 @@ def article_detail(request, slug):
     """Full detail page for any published article."""
     article = get_object_or_404(Article, slug=slug, status=Article.STATUS_PUBLISHED)
     
-    # Increment views count
-    Article.objects.filter(id=article.id).update(views_count=F('views_count') + 1)
-    article.refresh_from_db()
+    # Increment views count uniquely per session
+    viewed_articles = request.session.get('viewed_articles', [])
+    if article.id not in viewed_articles:
+        Article.objects.filter(id=article.id).update(views_count=F('views_count') + 1)
+        viewed_articles.append(article.id)
+        request.session['viewed_articles'] = viewed_articles
+        article.refresh_from_db()
 
     # Related articles (3 articles from same category, fallback to latest)
     related = list(Article.objects.filter(
