@@ -388,7 +388,7 @@
 .opinion-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
 
 .opinion-author-wrap { display: flex; align-items: center; gap: 12px; }
-.opinion-avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #E2E8F0; flex-shrink: 0; }
+.opinion-avatar { display: none !important; }
 .opinion-author-name { font-size: 12px; font-weight: 700; color: #0F172A; letter-spacing: 0.5px; display: block; }
 .opinion-author-title { font-size: 11px; color: #64748B; display: block; margin-top: 2px; }
 .opinion-title { font-size: 16px; line-height: 1.4; margin: 0; font-family: 'Lora', serif; }
@@ -733,7 +733,6 @@
           {% for op in opinions %}
           <article class="opinion-card">
             <div class="opinion-author-wrap">
-              <img src="{{ op.display_author_avatar }}" alt="{{ op.display_author_name }}" class="opinion-avatar">
               <div>
                 <span class="opinion-author-name">{{ op.display_author_name|upper }}</span>
                 {% if op.author_title %}<span class="opinion-author-title">{{ op.author_title }}</span>{% endif %}
@@ -751,7 +750,6 @@
           {% empty %}
           <article class="opinion-card opinion-card-placeholder">
             <div class="opinion-author-wrap">
-              <img src="https://i.pravatar.cc/150?img=11" alt="Αρθρογράφος" class="opinion-avatar">
               <div>
                 <span class="opinion-author-name">ΜΙΧΑΗΛ ΘΕΟΔΩΡΙΔΗΣ</span>
                 <span class="opinion-author-title">Πολιτικός Αναλυτής</span>

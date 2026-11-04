@@ -145,11 +145,7 @@
     }
 
     .article-author-avatar {
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        object-fit: cover;
-        flex-shrink: 0;
+        display: none !important;
     }
 
     .article-author-name { font-weight: 700; font-size: 0.95rem; color: var(--navy, #0F172A); }
@@ -263,11 +259,7 @@
     }
 
     .author-bio-avatar {
-        width: 64px;
-        height: 64px;
-        border-radius: 50%;
-        object-fit: cover;
-        flex-shrink: 0;
+        display: none !important;
     }
 
     /* ── Related articles ── */
@@ -362,7 +354,6 @@
         {% endif %}
 
         <div class="article-author-row">
-            <img src="{{ article.display_author_avatar }}" alt="{{ article.display_author_name }}" class="article-author-avatar">
             <div>
                 <div class="article-author-name">{{ article.display_author_name }}</div>
                 <div class="article-author-role">{{ article.author_title|default:"Συντάκτης Dianisma" }}</div>
@@ -403,7 +394,6 @@
 
     <!-- Author Bio Box -->
     <div class="author-bio-card">
-        <img src="{{ article.display_author_avatar }}" alt="{{ article.display_author_name }}" class="author-bio-avatar">
         <div>
             <h4 style="margin:0 0 6px;font-size:1rem;color:var(--navy,#0F172A);">
                 {{ article.display_author_name }}

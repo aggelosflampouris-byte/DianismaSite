@@ -1,0 +1,620 @@
+/* =========================================================
+   DIANISMA.GR - ΑΠΟΨΕΙΣ & ΣΧΟΛΙΑ Category Page Stylesheet
+   ========================================================= */
+
+/* --- Category Title Banner --- */
+.oped-banner {
+    background: linear-gradient(135deg, #090e1a 0%, #0F172A 55%, #182338 100%);
+    color: var(--white);
+    padding: 36px 0 24px 0;
+    margin-bottom: 36px;
+    border-bottom: 3px solid var(--accent-light);
+    position: relative;
+    overflow: hidden;
+}
+
+.oped-banner::before {
+    content: '';
+    position: absolute;
+    top: -60px;
+    right: 8%;
+    width: 320px;
+    height: 320px;
+    background: radial-gradient(circle, rgba(202, 138, 4, 0.15) 0%, rgba(202, 138, 4, 0) 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.banner-inner {
+    position: relative;
+    z-index: 2;
+}
+
+/* Breadcrumb Navigation */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    margin-bottom: 16px;
+}
+
+.breadcrumb a {
+    color: #94a3b8;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: color 0.2s ease;
+}
+
+.breadcrumb a:hover {
+    color: var(--accent-light);
+}
+
+.breadcrumb-separator {
+    color: var(--accent-light);
+    font-weight: 700;
+}
+
+.breadcrumb-current {
+    color: var(--accent-light);
+}
+
+/* Banner Headings */
+.banner-headline-wrap {
+    max-width: 840px;
+}
+
+.banner-title-group {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.banner-tag {
+    background-color: var(--accent-color);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 3px 10px;
+    border-radius: 3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.banner-title {
+    font-family: var(--font-head);
+    font-size: 42px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--white);
+    margin: 0;
+    line-height: 1.1;
+}
+
+.banner-description {
+    font-size: 15px;
+    color: #cbd5e1;
+    font-weight: 400;
+    line-height: 1.55;
+    margin: 0;
+}
+
+
+/* --- Section Dividers --- */
+.section-title-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.section-title {
+    font-family: var(--font-head);
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    color: var(--primary-color);
+    white-space: nowrap;
+    margin: 0;
+}
+
+.section-rule {
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent-light) 0%, rgba(202, 138, 4, 0.1) 100%);
+}
+
+/* --- Featured Horizontal Op-Ed Cards Section --- */
+.featured-opeds-section {
+    margin-bottom: 48px;
+}
+
+.oped-horizontal-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.oped-highlight-card {
+    background: var(--white);
+    border-radius: 6px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    border: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.oped-highlight-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    border-color: #cbd5e1;
+}
+
+.oped-highlight-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent-color), var(--accent-light));
+    border-radius: 6px 6px 0 0;
+}
+
+.oped-card-top {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.oped-avatar {
+    display: none !important;
+}
+
+.oped-author-meta {
+    flex: 1;
+}
+
+.author-caps-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-dark);
+    letter-spacing: 0.8px;
+    display: block;
+    line-height: 1.2;
+}
+
+.author-column-tag {
+    font-size: 11px;
+    color: var(--accent-color);
+    font-weight: 600;
+    display: block;
+    margin-top: 3px;
+}
+
+.gold-badge-opinion {
+    background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-light) 100%);
+    color: var(--white);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    padding: 3px 8px;
+    border-radius: 2px;
+    align-self: flex-start;
+}
+
+.gold-badge-opinion.badge-inline {
+    margin-left: auto;
+}
+
+.oped-card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.oped-card-title {
+    font-family: var(--font-head);
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.35;
+    margin-bottom: 12px;
+}
+
+.oped-card-title a {
+    color: var(--text-dark);
+    transition: color 0.2s ease;
+}
+
+.oped-card-title a:hover {
+    color: var(--accent-color);
+}
+
+.oped-card-quote {
+    font-style: italic;
+    font-size: 13px;
+    color: #475569;
+    line-height: 1.55;
+    background: #f8fafc;
+    border-left: 3px solid var(--accent-color);
+    padding: 10px 12px;
+    border-radius: 0 4px 4px 0;
+    margin-bottom: 18px;
+    flex: 1;
+}
+
+.oped-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 12px;
+    font-size: 11.5px;
+    color: var(--text-muted);
+}
+
+/* --- Main Layout: Feed + Sidebar --- */
+.oped-main-layout {
+    display: grid;
+    grid-template-columns: 2.15fr 1fr;
+    gap: 36px;
+    margin-bottom: 60px;
+}
+
+/* --- Opinion Stream Feed --- */
+.opinion-articles-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.opinion-feed-item {
+    background: var(--white);
+    border-radius: 6px;
+    padding: 24px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.opinion-feed-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+    border-color: #cbd5e1;
+}
+
+.feed-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--accent-light);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.opinion-feed-body {
+    flex: 1;
+}
+
+.opinion-feed-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.feed-author-name {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    color: var(--text-dark);
+}
+
+.dot-sep {
+    color: #94a3b8;
+    font-weight: 700;
+}
+
+.feed-cat-label {
+    font-size: 11px;
+    color: var(--accent-color);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.opinion-feed-title {
+    font-family: var(--font-head);
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.35;
+    margin-bottom: 10px;
+}
+
+.opinion-feed-title a {
+    color: var(--text-dark);
+    transition: color 0.2s ease;
+}
+
+.opinion-feed-title a:hover {
+    color: var(--accent-color);
+}
+
+.opinion-feed-excerpt {
+    font-size: 13.5px;
+    color: #475569;
+    line-height: 1.55;
+    margin-bottom: 14px;
+}
+
+.opinion-feed-footer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.feed-read-link {
+    margin-left: auto;
+    color: var(--accent-color);
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s ease, gap 0.2s ease;
+}
+
+.feed-read-link:hover {
+    color: var(--accent-light);
+    gap: 9px;
+}
+
+/* --- Load More Button --- */
+.load-more-wrap {
+    text-align: center;
+    margin-top: 36px;
+}
+
+.btn-load-more {
+    background: transparent;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    padding: 12px 28px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.25s ease;
+}
+
+.btn-load-more:hover {
+    background: var(--primary-color);
+    color: var(--white);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+}
+
+/* --- Sidebar Column --- */
+.sidebar-column {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.sidebar-widget {
+    background: var(--white);
+    border-radius: 6px;
+    padding: 24px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.widget-header {
+    border-bottom: 2px solid #f1f5f9;
+    padding-bottom: 14px;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.widget-badge {
+    background-color: #fee2e2;
+    color: #dc2626;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 3px;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.widget-badge.columnist-badge {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.widget-badge.discussed-badge {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.widget-title {
+    font-family: var(--font-head);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: var(--primary-color);
+    margin: 0;
+}
+
+/* Columnists Directory Widget */
+.columnists-intro {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    line-height: 1.45;
+}
+
+.columnists-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.columnist-item {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.columnist-item:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.columnist-img {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--accent-light);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.columnist-info {
+    flex: 1;
+}
+
+.columnist-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 2px;
+}
+
+.columnist-column-title {
+    font-size: 11px;
+    color: var(--accent-color);
+    font-weight: 600;
+    display: block;
+}
+
+.columnist-frequency {
+    font-size: 10.5px;
+    color: var(--text-muted);
+}
+
+
+
+/* Dialogues CTA Widget */
+.dialogues-opinion-cta {
+    background: linear-gradient(135deg, #090e1a 0%, #0F172A 100%);
+    color: var(--white);
+    border: 1px solid rgba(202, 138, 4, 0.3);
+}
+
+.dialogue-icon-wrap {
+    width: 44px;
+    height: 44px;
+    background: rgba(202, 138, 4, 0.15);
+    border: 1px solid rgba(202, 138, 4, 0.3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-light);
+    font-size: 18px;
+    margin-bottom: 14px;
+}
+
+.dialogue-cta-title {
+    font-family: var(--font-head);
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    color: var(--white);
+    margin-bottom: 8px;
+}
+
+.dialogue-cta-desc {
+    font-size: 12.5px;
+    color: #cbd5e1;
+    line-height: 1.5;
+    margin-bottom: 16px;
+}
+
+.btn-opinion-submit {
+    display: block;
+    text-align: center;
+    background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-light) 100%);
+    color: var(--white);
+    padding: 10px 16px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    transition: opacity 0.2s ease, transform 0.15s ease;
+}
+
+.btn-opinion-submit:hover {
+    opacity: 0.95;
+    transform: translateY(-1px);
+}
+
+/* --- Responsive --- */
+@media (max-width: 1024px) {
+    .oped-horizontal-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .oped-main-layout {
+        grid-template-columns: 1fr;
+    }
+    
+    .sidebar-column {
+        margin-top: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .banner-title {
+        font-size: 32px;
+    }
+    
+    .opinion-feed-item {
+        flex-direction: column;
+    }
+    
+    .opinion-feed-footer {
+        flex-wrap: wrap;
+    }
+    
+    .feed-read-link {
+        margin-left: 0;
+        margin-top: 8px;
+    }
+}

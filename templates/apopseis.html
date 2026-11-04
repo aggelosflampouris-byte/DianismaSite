@@ -42,7 +42,6 @@
             {% if hero_article %}
             <article class="oped-highlight-card">
                 <div class="oped-card-top">
-                    <img src="{{ hero_article.display_author_avatar }}" alt="{{ hero_article.display_author_name }}" class="oped-avatar">
                     <div class="oped-author-meta">
                         <span class="author-caps-name">{{ hero_article.display_author_name|upper }}</span>
                         <span class="author-column-tag">ΣΤΗΛΗ «ΕΠΙΦΥΛΛΙΔΑ»</span>
@@ -67,7 +66,6 @@
             {% for art in articles %}
             <article class="oped-highlight-card">
                 <div class="oped-card-top">
-                    <img src="{{ art.display_author_avatar }}" alt="{{ art.display_author_name }}" class="oped-avatar">
                     <div class="oped-author-meta">
                         <span class="author-caps-name">{{ art.display_author_name|upper }}</span>
                         <span class="author-column-tag">ΣΤΗΛΗ «ΣΤΟΧΑΣΜΟΙ»</span>
@@ -91,7 +89,6 @@
             {% if not hero_article %}
             <article class="oped-highlight-card">
                 <div class="oped-card-top">
-                    <img src="https://i.pravatar.cc/150?img=11" alt="Γιάννης Κωνσταντίνου" class="oped-avatar">
                     <div class="oped-author-meta">
                         <span class="author-caps-name">ΓΙΑΝΝΗΣ ΚΩΝΣΤΑΝΤΙΝΟΥ</span>
                         <span class="author-column-tag">ΣΤΗΛΗ «ΣΗΜΕΙΟ ΣΤΙΞΗΣ»</span>
