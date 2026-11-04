@@ -36,4 +36,10 @@ urlpatterns = [
     path('robots.txt', views.robots_txt, name='robots_txt'),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     path('category/<slug:slug>/', views.category_generic, name='category'),
+
+    # Legacy SEO redirects (preserve Google backlinks from old site)
+    path('tag/<path:tag_name>/', views.legacy_tag_redirect, name='legacy_tag_redirect'),
+    path('tag/<path:tag_name>', views.legacy_tag_redirect, name='legacy_tag_redirect_noslash'),
+    path('tags/<path:tag_name>/', views.legacy_tag_redirect, name='legacy_tags_redirect'),
+    path('tags/<path:tag_name>', views.legacy_tag_redirect, name='legacy_tags_redirect_noslash'),
 ]

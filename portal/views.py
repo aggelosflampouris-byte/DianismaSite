@@ -2,6 +2,7 @@
 Views for DIANISMA.GR public portal and contributor interactions.
 """
 import logging
+import urllib.parse
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -172,6 +173,11 @@ def load_more_articles(request):
 def search(request):
     """Global search view for public articles."""
     query = request.GET.get('q', '').strip()
+    if '%' in query:
+        try:
+            query = urllib.parse.unquote(query).strip()
+        except Exception:
+            pass
     published = Article.objects.filter(status=Article.STATUS_PUBLISHED)
     results = []
     
@@ -324,6 +330,24 @@ def robots_txt(request):
     content = f"User-agent: *\nAllow: /\nDisallow: /adminpanel/\nDisallow: /admin/\n\nSitemap: {scheme}://{host}/sitemap.xml\n"
     return HttpResponse(content, content_type="text/plain")
 
+
+
+
+def legacy_tag_redirect(request, tag_name=''):
+    """
+    301 Permanent Redirect for legacy tag URLs (e.g. /tag/<slug>/, /tags/<slug>/).
+    Preserves SEO authority from Google index and redirects users to site search.
+    """
+    decoded = urllib.parse.unquote(tag_name or '')
+    while '%' in decoded:
+        new_dec = urllib.parse.unquote(decoded)
+        if new_dec == decoded:
+            break
+        decoded = new_dec
+    clean_tag = decoded.rstrip('/').replace('-', ' ').replace('_', ' ').strip()
+    if clean_tag:
+        return redirect(f"/search/?q={urllib.parse.quote(clean_tag)}", permanent=True)
+    return redirect('/', permanent=True)
 
 def custom_404(request, exception=None):
     """Custom 404 error page handler."""

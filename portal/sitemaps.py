@@ -7,6 +7,7 @@ from adminpanel.models import Article, Category
 
 
 class ArticleSitemap(Sitemap):
+    protocol = "https"
     changefreq = "daily"
     priority = 0.8
 
@@ -21,6 +22,7 @@ class ArticleSitemap(Sitemap):
 
 
 class CategorySitemap(Sitemap):
+    protocol = "https"
     changefreq = "weekly"
     priority = 0.6
 
@@ -32,6 +34,7 @@ class CategorySitemap(Sitemap):
 
 
 class StaticViewSitemap(Sitemap):
+    protocol = "https"
     priority = 1.0
     changefreq = "daily"
 
