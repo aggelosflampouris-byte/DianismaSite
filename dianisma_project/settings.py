@@ -123,7 +123,7 @@ STORAGES = {
         'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
     },
     'default': {
-        'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage' if _has_cloudinary else 'django.core.files.storage.FileSystemStorage',
+        'BACKEND': 'dianisma_project.storage.SmartMediaCloudinaryStorage' if _has_cloudinary else 'django.core.files.storage.FileSystemStorage',
     },
 }
 
