@@ -162,15 +162,28 @@
     }
 
     /* ── Featured Image ── */
+    .article-featured-image-wrapper {
+        width: 100%;
+        margin-bottom: 36px;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
     .article-featured-image {
         width: 100%;
         max-width: 100%;
-        max-height: 480px;
-        object-fit: cover;
-        border-radius: 12px;
-        margin-bottom: 36px;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        height: auto;
+        max-height: 520px;
+        object-fit: contain;
         display: block;
+        margin: 0 auto;
     }
 
     /* ── Article body — CRITICAL image containment ── */
@@ -367,11 +380,10 @@
     </header>
 
     <!-- Lead / Featured Image -->
-    <div class="article-featured-image-wrapper" style="margin-bottom: 36px; border-radius: 12px; overflow: hidden; background: #e2e8f0;">
+    <div class="article-featured-image-wrapper">
         <img src="{{ article.get_image_url }}"
              alt="{{ article.title }}"
              class="article-featured-image"
-             style="width: 100%; max-height: 480px; object-fit: cover; display: block; margin-bottom: 0;"
              loading="eager"
              onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&q=80&w=1000';">
     </div>
