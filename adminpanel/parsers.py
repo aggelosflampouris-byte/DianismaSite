@@ -106,40 +106,76 @@ def extract_docx_content(file_obj) -> str:
     return ""
 
 
+def _load_optional_module(module_name: str):
+    """Safely load an optional module dynamically to satisfy IDE linters."""
+    try:
+        import importlib
+        return importlib.import_module(module_name)
+    except Exception:
+        return None
+
+
 def extract_pdf_content(file_obj) -> str:
     """Extract text from PDF file formatted into HTML paragraphs."""
-    try:
-        file_obj.seek(0)
-        import pdfplumber
-        with pdfplumber.open(file_obj) as pdf:
+    # 1. Try PyMuPDF (fitz)
+    fitz_mod = _load_optional_module('fitz')
+    if fitz_mod:
+        try:
+            file_obj.seek(0)
+            data = file_obj.read()
+            doc = fitz_mod.open(stream=data, filetype='pdf')
             pages = []
-            for p in pdf.pages:
-                txt = p.extract_text()
+            for page in doc:
+                txt = page.get_text().strip()
                 if txt:
                     pages.append(txt)
             full_text = "\n\n".join(pages).strip()
             if full_text:
                 paragraphs = [p.strip().replace("\n", " ") for p in full_text.split("\n\n") if p.strip()]
+                file_obj.seek(0)
                 return "".join(f"<p>{p}</p>" for p in paragraphs)
-    except Exception:
-        pass
+        except Exception:
+            pass
 
-    try:
-        file_obj.seek(0)
-        import pypdfium2
-        pdf = pypdfium2.PdfDocument(file_obj)
-        pages = []
-        for i in range(len(pdf)):
-            page_txt = pdf[i].get_textpage().get_text_range()
-            if page_txt:
-                pages.append(page_txt)
-        full_text = "\n\n".join(pages).strip()
-        if full_text:
-            paragraphs = [p.strip().replace("\n", " ") for p in full_text.split("\n\n") if p.strip()]
-            return "".join(f"<p>{p}</p>" for p in paragraphs)
-    except Exception:
-        pass
+    # 2. Try pdfplumber
+    pdfplumber_mod = _load_optional_module('pdfplumber')
+    if pdfplumber_mod:
+        try:
+            file_obj.seek(0)
+            with pdfplumber_mod.open(file_obj) as pdf:
+                pages = []
+                for p in pdf.pages:
+                    txt = p.extract_text()
+                    if txt:
+                        pages.append(txt)
+                full_text = "\n\n".join(pages).strip()
+                if full_text:
+                    paragraphs = [p.strip().replace("\n", " ") for p in full_text.split("\n\n") if p.strip()]
+                    file_obj.seek(0)
+                    return "".join(f"<p>{p}</p>" for p in paragraphs)
+        except Exception:
+            pass
 
+    # 3. Try pypdfium2
+    pdfium_mod = _load_optional_module('pypdfium2')
+    if pdfium_mod:
+        try:
+            file_obj.seek(0)
+            pdf = pdfium_mod.PdfDocument(file_obj)
+            pages = []
+            for i in range(len(pdf)):
+                page_txt = pdf[i].get_textpage().get_text_range()
+                if page_txt:
+                    pages.append(page_txt)
+            full_text = "\n\n".join(pages).strip()
+            if full_text:
+                paragraphs = [p.strip().replace("\n", " ") for p in full_text.split("\n\n") if p.strip()]
+                file_obj.seek(0)
+                return "".join(f"<p>{p}</p>" for p in paragraphs)
+        except Exception:
+            pass
+
+    file_obj.seek(0)
     return ""
 
 
@@ -248,23 +284,49 @@ def parse_pdf_details(file_obj, filename: str = '') -> dict:
     title = ''
     excerpt = ''
 
-    try:
-        import pdfplumber
-        with pdfplumber.open(file_obj) as pdf:
-            meta = pdf.metadata or {}
-            meta_title = (meta.get('Title') or '').strip()
+    # 1. Try PyMuPDF (fitz)
+    fitz_mod = _load_optional_module('fitz')
+    if fitz_mod:
+        try:
+            file_obj.seek(0)
+            data = file_obj.read()
+            doc = fitz_mod.open(stream=data, filetype='pdf')
+            meta = doc.metadata or {}
+            meta_title = (meta.get('title') or '').strip()
             if meta_title and len(meta_title) > 3 and not meta_title.lower().startswith(('untitled', 'microsoft', 'word')):
                 title = meta_title
 
-            if len(pdf.pages) > 0:
-                first_text = pdf.pages[0].extract_text() or ''
+            if len(doc) > 0:
+                first_text = doc[0].get_text().strip()
                 lines = [l.strip() for l in first_text.split('\n') if l.strip()]
                 if not title and lines:
                     title = lines[0][:255]
                 if len(lines) > 1:
                     excerpt = " ".join(lines[1:4])[:500]
-    except Exception:
-        pass
+        except Exception:
+            pass
+
+    # 2. Try pdfplumber
+    if not title:
+        pdfplumber_mod = _load_optional_module('pdfplumber')
+        if pdfplumber_mod:
+            try:
+                file_obj.seek(0)
+                with pdfplumber_mod.open(file_obj) as pdf:
+                    meta = pdf.metadata or {}
+                    meta_title = (meta.get('Title') or '').strip()
+                    if meta_title and len(meta_title) > 3 and not meta_title.lower().startswith(('untitled', 'microsoft', 'word')):
+                        title = meta_title
+
+                    if len(pdf.pages) > 0:
+                        first_text = pdf.pages[0].extract_text() or ''
+                        lines = [l.strip() for l in first_text.split('\n') if l.strip()]
+                        if not title and lines:
+                            title = lines[0][:255]
+                        if len(lines) > 1:
+                            excerpt = " ".join(lines[1:4])[:500]
+            except Exception:
+                pass
 
     if not title and filename:
         base = os.path.splitext(os.path.basename(filename))[0]
