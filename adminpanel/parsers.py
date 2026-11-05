@@ -301,3 +301,30 @@ def parse_document_details(file_obj, filename: str = '') -> dict:
     return details
 
 
+def extract_first_docx_image(file_obj) -> tuple | None:
+    """
+    Extract the first image embedded inside a Word (.docx) document.
+    Returns (image_bytes: bytes, filename: str) or None if no images exist.
+    """
+    try:
+        import zipfile
+        file_obj.seek(0)
+        with zipfile.ZipFile(file_obj, 'r') as z:
+            media_files = [
+                f for f in z.namelist()
+                if f.startswith('word/media/') and os.path.splitext(f)[1].lower() in ('.jpg', '.jpeg', '.png', '.webp')
+            ]
+            media_files.sort()
+            if media_files:
+                img_data = z.read(media_files[0])
+                ext = os.path.splitext(media_files[0])[1].lower()
+                name = f"docx_lead{ext}"
+                file_obj.seek(0)
+                return img_data, name
+    except Exception:
+        pass
+    file_obj.seek(0)
+    return None
+
+
+

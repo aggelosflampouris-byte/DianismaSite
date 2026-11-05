@@ -115,8 +115,39 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# WhiteNoise: compress and cache static files for production.
-_has_cloudinary = bool(os.environ.get('CLOUDINARY_API_KEY'))
+# ── Cloudinary (media / uploaded images) ──────────────────────────────────────
+_cloudinary_url = os.environ.get('CLOUDINARY_URL', '').strip()
+_cloud_name = os.environ.get('CLOUDINARY_CLOUD_NAME', '').strip()
+_api_key = os.environ.get('CLOUDINARY_API_KEY', '').strip()
+_api_secret = os.environ.get('CLOUDINARY_API_SECRET', '').strip()
+
+# Always enforce active cloud name if empty or legacy 'dianisma'
+if not _cloud_name or _cloud_name == 'dianisma':
+    _cloud_name = 'dh7aqmruq'
+
+# Support parsing from CLOUDINARY_URL if separate credentials not passed
+if _cloudinary_url and (not _api_key or not _api_secret):
+    import urllib.parse
+    try:
+        parsed_c = urllib.parse.urlsplit(_cloudinary_url)
+        if parsed_c.scheme == 'cloudinary':
+            _api_key = parsed_c.username or _api_key
+            _api_secret = parsed_c.password or _api_secret
+            if parsed_c.hostname and parsed_c.hostname != 'dianisma':
+                _cloud_name = parsed_c.hostname
+    except Exception:
+        pass
+
+if not _api_key:
+    _api_key = '783348361251748'
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': _cloud_name,
+    'API_KEY':    _api_key,
+    'API_SECRET': _api_secret,
+}
+
+_has_cloudinary = bool(_api_key and _api_secret) or bool(_cloudinary_url)
 
 STORAGES = {
     'staticfiles': {
@@ -125,13 +156,6 @@ STORAGES = {
     'default': {
         'BACKEND': 'dianisma_project.storage.SmartMediaCloudinaryStorage' if _has_cloudinary else 'django.core.files.storage.FileSystemStorage',
     },
-}
-
-# â”€â”€ Cloudinary (media / uploaded images) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', 'dh7aqmruq'),
-    'API_KEY':    os.environ.get('CLOUDINARY_API_KEY', ''),
-    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', ''),
 }
 
 MEDIA_URL = '/media/'

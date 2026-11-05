@@ -14,12 +14,14 @@ from django.utils import timezone
 from django.db.models import Sum, Count, Q
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
+from django.core.files.base import ContentFile
 from .models import Article, Category, AuthorApplication, Profile
 from .parsers import (
     validate_document_file,
     validate_image_file,
     extract_document_content,
     parse_document_details,
+    extract_first_docx_image,
 )
 
 User = get_user_model()
@@ -85,6 +87,12 @@ def _parse_article_post(post: dict, files, existing_pdf=None) -> tuple:
         is_valid_img, img_err = validate_image_file(image_file)
         if not is_valid_img:
             errors['lead_image'] = img_err
+    elif doc_file and not clear_image and not lead_image_url:
+        # Check if Word document has an embedded image to use as featured lead image
+        extracted_img = extract_first_docx_image(doc_file)
+        if extracted_img:
+            img_bytes, img_name = extracted_img
+            image_file = ContentFile(img_bytes, name=img_name)
 
     if not title:
         errors['title'] = 'Ο τίτλος είναι υποχρεωτικός.'
@@ -350,11 +358,25 @@ def article_parse_document_ajax(request):
 
     try:
         details = parse_document_details(doc_file, getattr(doc_file, 'name', ''))
+
+        # Check if an image is embedded inside docx
+        import base64
+        import os
+        image_preview = None
+        extracted_img = extract_first_docx_image(doc_file)
+        if extracted_img:
+            img_bytes, img_name = extracted_img
+            ext = os.path.splitext(img_name)[1].lower().lstrip('.') or 'png'
+            b64 = base64.b64encode(img_bytes).decode('ascii')
+            image_preview = f"data:image/{ext};base64,{b64}"
+
         return JsonResponse({
             'success': True,
             'title': details.get('title', ''),
             'excerpt': details.get('excerpt', ''),
             'content': details.get('content', ''),
+            'has_image': image_preview is not None,
+            'image_preview': image_preview,
         })
     except Exception as exc:
         return JsonResponse({'success': False, 'error': f'Σφάλμα κατά την ανάλυση: {str(exc)}'}, status=500)

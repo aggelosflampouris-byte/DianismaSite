@@ -209,18 +209,17 @@
                    accept="image/jpeg,image/png,image/webp" />
             <small style="color: #64748b; font-size: 11px; display: block; margin-top: 4px;">Υποστηρίζονται: JPG, PNG, WebP (έως 10MB)</small>
             {% if errors.lead_image %}<div class="form-error">⚠️ {{ errors.lead_image }}</div>{% endif %}
-            {% if is_edit %}
-              <div style="margin-top: 8px;">
-                <img src="{{ article.get_image_url }}" alt="Preview" style="max-width: 100%; border-radius: 4px; max-height: 110px; object-fit: cover;" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&q=80&w=1000';" />
+            <div id="image-preview-container" style="{% if not is_edit or not article.lead_image and not article.lead_image_url %}display:none;{% endif %} margin-top: 8px;">
+              <img id="image-preview-img" src="{% if is_edit %}{{ article.get_image_url }}{% endif %}" alt="Preview" style="max-width: 100%; border-radius: 4px; max-height: 110px; object-fit: cover;" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&q=80&w=1000';" />
+              <div id="image-source-note" style="font-size: 11px; color: #64748b; margin-top: 4px;"></div>
+            </div>
+            {% if is_edit and article.lead_image %}
+              <div style="margin-top: 6px;">
+                <label style="font-size: 0.8rem; color: #dc2626; display: inline-flex; align-items: center; gap: 5px; cursor: pointer;">
+                  <input type="checkbox" name="clear_image" value="1" />
+                  <span>Αφαίρεση τρέχοντος αρχείου εικόνας</span>
+                </label>
               </div>
-              {% if article.lead_image %}
-                <div style="margin-top: 6px;">
-                  <label style="font-size: 0.8rem; color: #dc2626; display: inline-flex; align-items: center; gap: 5px; cursor: pointer;">
-                    <input type="checkbox" name="clear_image" value="1" />
-                    <span>Αφαίρεση τρέχοντος αρχείου εικόνας</span>
-                  </label>
-                </div>
-              {% endif %}
             {% endif %}
           </div>
 
@@ -355,9 +354,25 @@ document.addEventListener('DOMContentLoaded', function () {
             setTimeout(() => { contentInput.style.backgroundColor = ''; }, 1500);
           }
 
+          // If docx contained an image, display preview in sidebar card
+          const imgPreviewContainer = document.getElementById('image-preview-container');
+          const imgPreviewImg = document.getElementById('image-preview-img');
+          const imgSourceNote = document.getElementById('image-source-note');
+          if (data.has_image && data.image_preview && imgPreviewContainer && imgPreviewImg) {
+            imgPreviewImg.src = data.image_preview;
+            imgPreviewContainer.style.display = 'block';
+            if (imgSourceNote) {
+              imgSourceNote.innerHTML = '📷 <em>Βρέθηκε εικόνα στο έγγραφο Word και θα χρησιμοποιηθεί ως κύρια εικόνα.</em>';
+            }
+          }
+
           if (parseFeedback) {
             parseFeedback.style.color = '#059669';
-            parseFeedback.innerHTML = '✓ <strong>Αναγνωρίστηκε επιτυχώς!</strong> Ο τίτλος και το περιεχόμενο συμπληρώθηκαν αυτόματα από το αρχείο Word (' + file.name + ').';
+            let msg = '✓ <strong>Αναγνωρίστηκε επιτυχώς!</strong> Ο τίτλος και το περιεχόμενο συμπληρώθηκαν αυτόματα από το αρχείο Word (' + file.name + ').';
+            if (data.has_image) {
+              msg += ' Εντοπίστηκε και εικόνα άρθρου!';
+            }
+            parseFeedback.innerHTML = msg;
           }
         } else {
           if (parseFeedback) {
@@ -369,6 +384,24 @@ document.addEventListener('DOMContentLoaded', function () {
         if (parseFeedback) {
           parseFeedback.style.color = '#dc2626';
           parseFeedback.innerHTML = '⚠️ Σφάλμα δικτύου κατά την ανάλυση του αρχείου.';
+        }
+      }
+    });
+  }
+
+  // Real-time preview for manually selected lead image file
+  const leadImgInput = document.getElementById('lead_image');
+  if (leadImgInput) {
+    leadImgInput.addEventListener('change', function () {
+      const imgFile = leadImgInput.files ? leadImgInput.files[0] : null;
+      const imgPreviewContainer = document.getElementById('image-preview-container');
+      const imgPreviewImg = document.getElementById('image-preview-img');
+      const imgSourceNote = document.getElementById('image-source-note');
+      if (imgFile && imgPreviewContainer && imgPreviewImg) {
+        imgPreviewImg.src = URL.createObjectURL(imgFile);
+        imgPreviewContainer.style.display = 'block';
+        if (imgSourceNote) {
+          imgSourceNote.innerHTML = '🖼️ <em>Επιλεγμένο αρχείο: ' + imgFile.name + '</em>';
         }
       }
     });
