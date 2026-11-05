@@ -333,7 +333,7 @@ def article_create(request):
                 author_name=parsed['author_name'] or request.user.get_full_name() or request.user.username,
                 excerpt=parsed['excerpt'],
                 content=parsed['content'],
-                pdf_file=files.get('pdf_file'),
+                pdf_file=request.FILES.get('pdf_file'),
                 lead_image=parsed['lead_image'],
                 lead_image_url=parsed['lead_image_url'],
                 read_time_minutes=parsed['read_time'],
