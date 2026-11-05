@@ -19,6 +19,7 @@ from .parsers import (
     validate_document_file,
     validate_image_file,
     extract_document_content,
+    parse_document_details,
 )
 
 User = get_user_model()
@@ -48,6 +49,9 @@ def _parse_article_post(post: dict, files, existing_pdf=None) -> tuple:
     lead_image_url = post.get('lead_image_url', '').strip()
     clear_image = post.get('clear_image') == '1'
     status_val = post.get('status', Article.STATUS_DRAFT).strip()
+    save_as = post.get('save_as')
+    if save_as in (Article.STATUS_PUBLISHED, Article.STATUS_DRAFT):
+        status_val = save_as
     is_featured = post.get('is_featured') == 'on'
 
     try:
@@ -60,10 +64,21 @@ def _parse_article_post(post: dict, files, existing_pdf=None) -> tuple:
         is_valid_doc, doc_err, _ = validate_document_file(doc_file)
         if not is_valid_doc:
             errors['pdf_file'] = doc_err
-        elif not content:
-            extracted_html = extract_document_content(doc_file)
-            if extracted_html:
-                content = extracted_html
+        else:
+            extracted = parse_document_details(doc_file, getattr(doc_file, 'name', ''))
+            if not title and extracted.get('title'):
+                title = extracted['title']
+            if not excerpt and extracted.get('excerpt'):
+                excerpt = extracted['excerpt']
+            if not content and extracted.get('content'):
+                content = extracted['content']
+
+    # Auto-generate excerpt from content if still empty
+    if not excerpt and content:
+        import re
+        plain = re.sub(r'<[^>]+>', ' ', content).strip()
+        if plain:
+            excerpt = plain[:300].rsplit(' ', 1)[0] + '...' if len(plain) > 300 else plain
 
     image_file = files.get('lead_image')
     if image_file:
@@ -316,6 +331,33 @@ def articles_list(request):
         'category_filter': category_filter,
         'active_page': 'articles',
     })
+
+
+@staff_member_required(login_url='/adminpanel/login/')
+@require_POST
+def article_parse_document_ajax(request):
+    """
+    AJAX endpoint to parse an uploaded Word (.docx) or PDF document and
+    return its extracted title, excerpt, and clean HTML content.
+    """
+    doc_file = request.FILES.get('document') or request.FILES.get('pdf_file')
+    if not doc_file:
+        return JsonResponse({'success': False, 'error': 'Δεν επιλέχθηκε αρχείο εγγράφου.'}, status=400)
+
+    is_valid, err_msg, _ = validate_document_file(doc_file)
+    if not is_valid:
+        return JsonResponse({'success': False, 'error': err_msg}, status=400)
+
+    try:
+        details = parse_document_details(doc_file, getattr(doc_file, 'name', ''))
+        return JsonResponse({
+            'success': True,
+            'title': details.get('title', ''),
+            'excerpt': details.get('excerpt', ''),
+            'content': details.get('content', ''),
+        })
+    except Exception as exc:
+        return JsonResponse({'success': False, 'error': f'Σφάλμα κατά την ανάλυση: {str(exc)}'}, status=500)
 
 
 @staff_member_required(login_url='/adminpanel/login/')

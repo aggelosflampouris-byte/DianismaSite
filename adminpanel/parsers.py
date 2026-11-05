@@ -2,6 +2,7 @@
 File parsers and validators for Article documents (PDF, DOCX) and media images.
 """
 import os
+import re
 from PIL import Image
 
 MAX_DOCUMENT_SIZE = 15 * 1024 * 1024  # 15MB
@@ -160,4 +161,143 @@ def extract_document_content(file_obj) -> str:
 
     file_obj.seek(0)
     return content
+
+
+def parse_docx_details(file_obj, filename: str = '') -> dict:
+    """
+    Extract title, excerpt, and clean HTML content from Word (.docx) file.
+    """
+    file_obj.seek(0)
+    title = ''
+    excerpt = ''
+    first_p_idx = -1
+
+    try:
+        import docx
+        doc = docx.Document(file_obj)
+
+        # 1. Check core properties for a valid author-set title
+        cp_title = getattr(getattr(doc, 'core_properties', None), 'title', '') or ''
+        if cp_title and len(cp_title.strip()) > 3 and not cp_title.strip().lower().startswith(('microsoft word', 'document', 'untitled')):
+            title = cp_title.strip()
+
+        # 2. Check paragraph styles for 'Title' or 'Heading 1'
+        if not title:
+            for idx, p in enumerate(doc.paragraphs):
+                style_name = (p.style.name if p.style else '').lower()
+                text = p.text.strip()
+                if text and ('title' in style_name or 'heading 1' in style_name):
+                    title = text
+                    first_p_idx = idx
+                    break
+
+        # 3. Fallback: First non-empty paragraph
+        if not title:
+            for idx, p in enumerate(doc.paragraphs):
+                text = p.text.strip()
+                if text:
+                    title = text
+                    first_p_idx = idx
+                    break
+        elif first_p_idx < 0:
+            for idx, p in enumerate(doc.paragraphs):
+                if p.text.strip() == title:
+                    first_p_idx = idx
+                    break
+
+        # 4. Extract excerpt: next non-empty paragraph following the title
+        if first_p_idx >= 0:
+            for p in doc.paragraphs[first_p_idx + 1:]:
+                text = p.text.strip()
+                if text:
+                    excerpt = text[:500]
+                    break
+    except Exception:
+        pass
+
+    # 5. Extract body content HTML
+    content = extract_docx_content(file_obj)
+
+    # 6. Fallback title from filename if empty
+    if not title and filename:
+        base = os.path.splitext(os.path.basename(filename))[0]
+        title = base.replace('_', ' ').replace('-', ' ').strip()
+
+    # 7. Strip duplicate leading title header from content if present
+    if title and content:
+        escaped_title = re.escape(title)
+        stripped = re.sub(rf'^\s*<h[1-3][^>]*>\s*{escaped_title}\s*</h[1-3]>\s*', '', content, flags=re.IGNORECASE)
+        if not stripped.strip():
+            stripped = re.sub(rf'^\s*<p[^>]*>\s*<b>?\s*{escaped_title}\s*</b>?\s*</p>\s*', '', content, flags=re.IGNORECASE)
+        if stripped.strip():
+            content = stripped.strip()
+
+    file_obj.seek(0)
+    return {
+        'title': title[:255],
+        'excerpt': excerpt[:600],
+        'content': content,
+    }
+
+
+def parse_pdf_details(file_obj, filename: str = '') -> dict:
+    """
+    Extract title, excerpt, and text content from PDF file.
+    """
+    file_obj.seek(0)
+    title = ''
+    excerpt = ''
+
+    try:
+        import pdfplumber
+        with pdfplumber.open(file_obj) as pdf:
+            meta = pdf.metadata or {}
+            meta_title = (meta.get('Title') or '').strip()
+            if meta_title and len(meta_title) > 3 and not meta_title.lower().startswith(('untitled', 'microsoft', 'word')):
+                title = meta_title
+
+            if len(pdf.pages) > 0:
+                first_text = pdf.pages[0].extract_text() or ''
+                lines = [l.strip() for l in first_text.split('\n') if l.strip()]
+                if not title and lines:
+                    title = lines[0][:255]
+                if len(lines) > 1:
+                    excerpt = " ".join(lines[1:4])[:500]
+    except Exception:
+        pass
+
+    if not title and filename:
+        base = os.path.splitext(os.path.basename(filename))[0]
+        title = base.replace('_', ' ').replace('-', ' ').strip()
+
+    content = extract_pdf_content(file_obj)
+    file_obj.seek(0)
+    return {
+        'title': title[:255],
+        'excerpt': excerpt[:600],
+        'content': content,
+    }
+
+
+def parse_document_details(file_obj, filename: str = '') -> dict:
+    """
+    Extract title, excerpt, and full body content from a Word (.docx) or PDF document.
+    """
+    if not file_obj:
+        return {'title': '', 'excerpt': '', 'content': ''}
+
+    fname = (filename or getattr(file_obj, 'name', '')).lower()
+    if fname.endswith('.docx'):
+        details = parse_docx_details(file_obj, filename)
+    elif fname.endswith('.pdf'):
+        details = parse_pdf_details(file_obj, filename)
+    else:
+        try:
+            details = parse_docx_details(file_obj, filename)
+        except Exception:
+            details = parse_pdf_details(file_obj, filename)
+
+    file_obj.seek(0)
+    return details
+
 

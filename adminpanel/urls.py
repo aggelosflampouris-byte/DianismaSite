@@ -18,6 +18,7 @@ urlpatterns = [
     # Articles
     path('articles/', views.articles_list, name='articles_list'),
     path('articles/create/', views.article_create, name='article_create'),
+    path('articles/parse-document/', views.article_parse_document_ajax, name='article_parse_document'),
     path('articles/<int:article_id>/edit/', views.article_edit, name='article_edit'),
     path('articles/<int:article_id>/delete/', views.article_delete, name='article_delete'),
     path('articles/<int:article_id>/toggle-status/', views.article_toggle_status, name='article_toggle_status'),

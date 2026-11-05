@@ -105,7 +105,7 @@
             <td class="col-thumb">
               <div class="article-thumb">
                 {% if article.lead_image_url or article.lead_image %}
-                  <img src="{{ article.get_image_url }}" alt="{{ article.title }}" />
+                  <img src="{{ article.get_image_url }}" alt="{{ article.title }}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&q=80&w=1000';" />
                 {% else %}
                   📰
                 {% endif %}
