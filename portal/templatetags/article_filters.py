@@ -4,6 +4,7 @@ Custom template filters for article content cleanup.
 import re
 from django import template
 from django.utils.safestring import mark_safe
+from dianisma_project.storage import get_cloudinary_cloud_name
 
 register = template.Library()
 
@@ -25,8 +26,9 @@ def clean_content(value, featured_image_url=None):
 
     content = str(value)
 
-    # Fix legacy Cloudinary cloud name in body images
-    content = content.replace('res.cloudinary.com/dianisma/', 'res.cloudinary.com/dh7aqmruq/')
+    # Fix legacy Cloudinary cloud name in body images dynamically
+    cloud_name = get_cloudinary_cloud_name()
+    content = content.replace('res.cloudinary.com/dianisma/', f'res.cloudinary.com/{cloud_name}/')
 
     # Pattern 1: literal backslash-r followed by real newline char (most common from import)
     content = content.replace('\\\r\n', ' ')
@@ -69,12 +71,3 @@ def clean_content(value, featured_image_url=None):
 
     return mark_safe(content)
 
-
-@register.filter(name='fix_image_url')
-def fix_image_url(url):
-    """Fix Cloudinary double image/upload paths and legacy cloud name."""
-    if not url:
-        return url
-    url = url.replace('image/upload/image/upload/', 'image/upload/')
-    url = url.replace('res.cloudinary.com/dianisma/', 'res.cloudinary.com/dh7aqmruq/')
-    return url

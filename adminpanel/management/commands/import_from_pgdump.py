@@ -29,7 +29,7 @@ BLOG_POST_COLUMNS = [
     "audio_file", "scheduled_publish_date",
 ]
 
-CLOUDINARY_BASE = "https://res.cloudinary.com/dianisma/image/upload/"
+CLOUDINARY_BASE = "https://res.cloudinary.com/dh7aqmruq/image/upload/"
 
 CATEGORY_MAP = {
     "politics":    "Πολιτική",

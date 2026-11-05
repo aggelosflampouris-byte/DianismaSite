@@ -45,7 +45,8 @@ def _parse_article_post(post: dict, files, existing_pdf=None) -> tuple:
     author_name = post.get('author_name', '').strip()
     excerpt = post.get('excerpt', '').strip()
     content = post.get('content', '').strip()
-    lead_image_url = (post.get('lead_image_url') or post.get('featured_image_url') or '').strip()
+    lead_image_url = post.get('lead_image_url', '').strip()
+    clear_image = post.get('clear_image') == '1'
     status_val = post.get('status', Article.STATUS_DRAFT).strip()
     is_featured = post.get('is_featured') == 'on'
 
@@ -64,7 +65,7 @@ def _parse_article_post(post: dict, files, existing_pdf=None) -> tuple:
             if extracted_html:
                 content = extracted_html
 
-    image_file = files.get('lead_image') or files.get('featured_image')
+    image_file = files.get('lead_image')
     if image_file:
         is_valid_img, img_err = validate_image_file(image_file)
         if not is_valid_img:
@@ -89,6 +90,7 @@ def _parse_article_post(post: dict, files, existing_pdf=None) -> tuple:
         'content': content,
         'lead_image_url': lead_image_url,
         'lead_image': image_file,
+        'clear_image': clear_image,
         'status_val': status_val,
         'is_featured': is_featured,
         'read_time': read_time,
@@ -375,7 +377,9 @@ def article_edit(request, article_id):
             article.content = parsed['content']
             if 'pdf_file' in request.FILES:
                 article.pdf_file = request.FILES['pdf_file']
-            if parsed['lead_image']:
+            if parsed['clear_image']:
+                article.lead_image = None
+            elif parsed['lead_image']:
                 article.lead_image = parsed['lead_image']
             article.lead_image_url = parsed['lead_image_url']
             article.read_time_minutes = parsed['read_time']

@@ -7,6 +7,7 @@ from django.utils.text import slugify
 from django.utils import timezone
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from dianisma_project.storage import normalize_media_url
 
 User = get_user_model()
 
@@ -57,18 +58,15 @@ class Profile(models.Model):
         return f"{self.user.get_full_name() or self.user.username} ({self.get_status_display()})"
 
     @property
-    def display_avatar(self):
+    def display_avatar(self) -> str:
         """Return image url, avatar_url, or a default placeholder."""
         if self.avatar:
             try:
-                return self.avatar.url
+                return normalize_media_url(self.avatar.url)
             except Exception:
                 pass
         if self.avatar_url:
-            url = self.avatar_url
-            if 'res.cloudinary.com/dianisma/' in url:
-                url = url.replace('res.cloudinary.com/dianisma/', 'res.cloudinary.com/dh7aqmruq/')
-            return url
+            return normalize_media_url(self.avatar_url)
         return 'https://i.pravatar.cc/150?img=68'
 
     @property
@@ -220,36 +218,22 @@ class Article(models.Model):
         from django.urls import reverse
         return reverse('article_detail', kwargs={'slug': self.slug})
 
-    @property
-    def featured_image(self):
-        """Alias for lead_image to support featured_image property naming."""
-        return self.lead_image
-
-    @property
-    def featured_image_url(self):
-        """Alias for lead_image_url to support featured_image property naming."""
-        return self.lead_image_url
-
     DEFAULT_FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&q=80&w=1000'
 
     @property
-    def get_image_url(self):
+    def get_image_url(self) -> str:
         """Return lead_image URL, lead_image_url, or fallback image."""
-        url = ''
         if self.lead_image:
             try:
-                url = self.lead_image.url
+                url = normalize_media_url(self.lead_image.url)
+                if url:
+                    return url
             except Exception:
-                url = ''
-        if not url and self.lead_image_url:
-            url = self.lead_image_url.strip()
-
-        if url:
-            from django.conf import settings
-            cloud_name = getattr(settings, 'CLOUDINARY_STORAGE', {}).get('CLOUD_NAME') or 'dh7aqmruq'
-            url = url.replace('res.cloudinary.com/dianisma/', f'res.cloudinary.com/{cloud_name}/')
-            url = url.replace('image/upload/image/upload/', 'image/upload/')
-            return url
+                pass
+        if self.lead_image_url:
+            url = normalize_media_url(self.lead_image_url)
+            if url:
+                return url
 
         return self.DEFAULT_FALLBACK_IMAGE
 

@@ -215,6 +215,14 @@
               <div style="margin-top: 8px;">
                 <img src="{{ article.get_image_url }}" alt="Preview" style="max-width: 100%; border-radius: 4px; max-height: 110px; object-fit: cover;" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&q=80&w=1000';" />
               </div>
+              {% if article.lead_image %}
+                <div style="margin-top: 6px;">
+                  <label style="font-size: 0.8rem; color: #dc2626; display: inline-flex; align-items: center; gap: 5px; cursor: pointer;">
+                    <input type="checkbox" name="clear_image" value="1" />
+                    <span>Αφαίρεση τρέχοντος αρχείου εικόνας</span>
+                  </label>
+                </div>
+              {% endif %}
             {% endif %}
           </div>
 

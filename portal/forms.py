@@ -74,18 +74,33 @@ class WriterArticleSubmitForm(forms.ModelForm):
             'category',
             'excerpt',
             'pdf_file',
-            'content',
-            'lead_image_url',
             'lead_image',
+            'lead_image_url',
+            'content',
             'read_time_minutes',
         ]
+        labels = {
+            'title': 'Τίτλος Άρθρου',
+            'category': 'Κατηγορία',
+            'excerpt': 'Σύνοψη / Lead Paragraph',
+            'pdf_file': 'Αρχείο Εγγράφου (PDF / Word .docx)',
+            'lead_image': 'Αρχείο Κύριας Εικόνας',
+            'lead_image_url': 'Εξωτερικό URL Εικόνας (προαιρετικό)',
+            'content': 'Κυρίως Κείμενο',
+            'read_time_minutes': 'Χρόνος Ανάγνωσης (λεπτά)',
+        }
+        help_texts = {
+            'pdf_file': 'Υποστηρίζονται αρχεία PDF (.pdf) και Word (.docx) έως 15MB. Το κείμενο εξάγεται αυτόματα.',
+            'lead_image': 'Μεταφορτώστε την εικόνα του άρθρου (JPG, PNG, WebP έως 10MB).',
+            'lead_image_url': 'Συμπληρώστε μόνο εάν χρησιμοποιείτε εξωτερικό σύνδεσμο αντί για αρχείο εικόνας.',
+        }
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Τίτλος άρθρου...', 'required': True}),
             'excerpt': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Σύντομη περίληψη (lead paragraph)...', 'required': True}),
             'content': forms.Textarea(attrs={'class': 'form-control editor-content', 'rows': 12, 'placeholder': 'Κυρίως κείμενο του άρθρου...'}),
             'pdf_file': forms.FileInput(attrs={'class': 'form-control', 'accept': '.pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document'}),
             'lead_image': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/jpeg,image/png,image/webp'}),
-            'lead_image_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://images.unsplash.com/...'}),
+            'lead_image_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://...'}),
             'read_time_minutes': forms.NumberInput(attrs={'class': 'form-control', 'min': 1, 'max': 60, 'value': 5}),
         }
 

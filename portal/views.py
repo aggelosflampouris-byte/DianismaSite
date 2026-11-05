@@ -174,10 +174,14 @@ def search(request):
     """Global search view for public articles."""
     query = request.GET.get('q', '').strip()
     if '%' in query:
-        try:
-            query = urllib.parse.unquote(query).strip()
-        except Exception:
-            pass
+        for _ in range(3):
+            try:
+                new_q = urllib.parse.unquote(query).strip()
+                if new_q == query:
+                    break
+                query = new_q
+            except Exception:
+                break
     published = Article.objects.filter(status=Article.STATUS_PUBLISHED)
     results = []
     
