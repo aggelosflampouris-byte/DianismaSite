@@ -322,3 +322,39 @@ class AuthorApplication(models.Model):
             self.STATUS_REJECTED: 'badge-rejected',
         }
         return badges.get(self.status, 'badge-pending')
+
+
+class SiteSetting(models.Model):
+    """Key-value site settings backing store with default fallback values."""
+    key = models.CharField('Κλειδί Ρύθμισης', max_length=100, unique=True, db_index=True)
+    value = models.TextField('Τιμή Ρύθμισης', blank=True, default='')
+    description = models.CharField('Περιγραφή', max_length=255, blank=True)
+    updated_at = models.DateTimeField('Τελευταία Ενημέρωση', auto_now=True)
+
+    class Meta:
+        verbose_name = 'Ρύθμιση Site'
+        verbose_name_plural = 'Ρυθμίσεις Site'
+        ordering = ['key']
+
+    def __str__(self):
+        return f"{self.key}: {self.value[:30]}"
+
+    @classmethod
+    def get_setting(cls, key: str, default: str = '') -> str:
+        """Fetch setting value safely, falling back to default."""
+        try:
+            obj = cls.objects.filter(key=key).first()
+            if obj and obj.value:
+                return obj.value
+        except Exception:
+            pass
+        return default
+
+    @classmethod
+    def set_setting(cls, key: str, value: str, description: str = ''):
+        """Create or update setting value."""
+        defaults = {'value': value or ''}
+        if description:
+            defaults['description'] = description
+        cls.objects.update_or_create(key=key, defaults=defaults)
+

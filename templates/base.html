@@ -151,10 +151,10 @@
                 <a href="#" onclick="if(window.openCookieConsent){window.openCookieConsent();} return false;">Ρυθμίσεις Cookies</a>
             </div>
             <div class="footer-social">
-                <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-                <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-                <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-                <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                {% if social_links.facebook %}<a href="{{ social_links.facebook }}" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>{% endif %}
+                {% if social_links.twitter %}<a href="{{ social_links.twitter }}" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)"><i class="fab fa-x-twitter"></i></a>{% endif %}
+                {% if social_links.instagram %}<a href="{{ social_links.instagram }}" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>{% endif %}
+                {% if social_links.youtube %}<a href="{{ social_links.youtube }}" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="fab fa-youtube"></i></a>{% endif %}
             </div>
         </div>
     </footer>

@@ -5,6 +5,82 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/adminpage/articles.css' %}" />
+<style>
+  /* Categories table specific layout */
+  .categories-table-wrapper {
+    overflow-x: auto;
+    width: 100%;
+  }
+  #categories-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+  }
+  #categories-table th,
+  #categories-table td {
+    padding: 14px 16px;
+    vertical-align: middle;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+  #categories-table th {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    background: #F8FAFC;
+    border-bottom: 1.5px solid #E2E8F0;
+  }
+  #categories-table td {
+    border-bottom: 1px solid #F1F5F9;
+    font-size: 0.86rem;
+    color: var(--text-dark);
+  }
+  #categories-table tbody tr:hover td {
+    background: #F8FAFC;
+  }
+  .col-cat-order   { width: 80px; text-align: center; }
+  .col-cat-name    { width: 22%; font-weight: 600; color: var(--navy); }
+  .col-cat-slug    { width: 22%; }
+  .col-cat-desc    { width: 32%; color: #64748b; }
+  .col-cat-count   { width: 110px; text-align: center; }
+  .col-cat-actions { width: 110px; text-align: right; }
+
+  .rank-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 6px;
+    border-radius: 6px;
+    background: #E2E8F0;
+    color: var(--navy);
+    font-weight: 700;
+    font-size: 0.8rem;
+  }
+  .slug-chip {
+    display: inline-block;
+    padding: 3px 8px;
+    background: #F1F5F9;
+    border: 1px solid #E2E8F0;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.82rem;
+    color: #475569;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .action-btns-cell {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+  }
+</style>
 {% endblock %}
 
 {% block breadcrumb %}
@@ -24,37 +100,39 @@
 </div>
 
 <div class="card" id="categories-table-card">
-  <div class="card-body" style="padding:0;">
-    <table class="recent-table data-table" id="categories-table">
+  <div class="card-body categories-table-wrapper" style="padding:0;">
+    <table id="categories-table">
       <thead>
         <tr>
-          <th>Σειρά</th>
-          <th>Κατηγορία</th>
-          <th>Slug</th>
-          <th>Περιγραφή</th>
-          <th>Άρθρα</th>
-          <th>Ενέργειες</th>
+          <th class="col-cat-order">Σειρά</th>
+          <th class="col-cat-name">Κατηγορία</th>
+          <th class="col-cat-slug">Slug</th>
+          <th class="col-cat-desc">Περιγραφή</th>
+          <th class="col-cat-count">Άρθρα</th>
+          <th class="col-cat-actions">Ενέργειες</th>
         </tr>
       </thead>
       <tbody>
         {% for cat in categories %}
         <tr>
-          <td><span class="rank-badge">{{ cat.order }}</span></td>
-          <td><strong>{{ cat.name }}</strong></td>
-          <td><code class="slug-chip">{{ cat.slug }}</code></td>
-          <td>{{ cat.description|truncatechars:60|default:"—" }}</td>
-          <td>
-            <a href="{% url 'adminpanel:articles_list' %}?category={{ cat.slug }}" class="views-count">
+          <td class="col-cat-order"><span class="rank-badge">{{ cat.order }}</span></td>
+          <td class="col-cat-name"><strong>{{ cat.name }}</strong></td>
+          <td class="col-cat-slug"><code class="slug-chip" title="{{ cat.slug }}">{{ cat.slug }}</code></td>
+          <td class="col-cat-desc">{{ cat.description|truncatechars:90|default:"—" }}</td>
+          <td class="col-cat-count">
+            <a href="{% url 'adminpanel:articles_list' %}?category={{ cat.slug }}" class="views-count" style="justify-content:center;">
               <i class="fas fa-newspaper"></i> {{ cat.art_count }}
             </a>
           </td>
-          <td class="action-cell">
-            <a href="{% url 'adminpanel:category_edit' cat.id %}" class="action-btn edit-btn" title="Επεξεργασία">
-              <i class="fas fa-edit"></i>
-            </a>
-            <a href="{% url 'adminpanel:articles_list' %}?category={{ cat.slug }}" class="action-btn view-btn" title="Δες άρθρα">
-              <i class="fas fa-list"></i>
-            </a>
+          <td class="col-cat-actions">
+            <div class="action-btns-cell">
+              <a href="{% url 'adminpanel:category_edit' cat.id %}" class="action-btn edit" title="Επεξεργασία">
+                <i class="fas fa-edit"></i>
+              </a>
+              <a href="{% url 'adminpanel:articles_list' %}?category={{ cat.slug }}" class="action-btn" title="Δες άρθρα">
+                <i class="fas fa-list"></i>
+              </a>
+            </div>
           </td>
         </tr>
         {% empty %}

@@ -68,9 +68,15 @@
                 <div class="oped-card-top">
                     <div class="oped-author-meta">
                         <span class="author-caps-name">{{ art.display_author_name|upper }}</span>
-                        <span class="author-column-tag">ΣΤΗΛΗ «ΣΤΟΧΑΣΜΟΙ»</span>
+                        {% if art.author_title %}
+                        <span class="author-column-tag">{{ art.author_title|upper }}</span>
+                        {% elif art.category %}
+                        <span class="author-column-tag">{{ art.category.name|upper }}</span>
+                        {% else %}
+                        <span class="author-column-tag">ΑΡΘΡΟΓΡΑΦΟΣ DIANISMA</span>
+                        {% endif %}
                     </div>
-                    <span class="gold-badge-opinion">ΑΠΟΨΗ</span>
+                    <span class="gold-badge-opinion">{% if art.category %}{{ art.category.name|upper }}{% else %}ΑΠΟΨΗ{% endif %}</span>
                 </div>
                 <div class="oped-card-body">
                     <h3 class="oped-card-title">
@@ -87,27 +93,7 @@
             </article>
             {% empty %}
             {% if not hero_article %}
-            <article class="oped-highlight-card">
-                <div class="oped-card-top">
-                    <div class="oped-author-meta">
-                        <span class="author-caps-name">ΓΙΑΝΝΗΣ ΚΩΝΣΤΑΝΤΙΝΟΥ</span>
-                        <span class="author-column-tag">ΣΤΗΛΗ «ΣΗΜΕΙΟ ΣΤΙΞΗΣ»</span>
-                    </div>
-                    <span class="gold-badge-opinion">ΑΠΟΨΗ</span>
-                </div>
-                <div class="oped-card-body">
-                    <h3 class="oped-card-title">
-                        <a href="#">Η κοινωνική συνοχή σε κίνδυνο: Γιατί οι δείκτες ευημερούν αλλά η καθημερινότητα απομακρύνεται;</a>
-                    </h3>
-                    <p class="oped-card-quote">
-                        «Η δημοκρατία δεν δοκιμάζεται στην αφθονία των μακροοικονομικών εξαγγελιών, αλλά στο αίσθημα δικαιοσύνης που βιώνει ο πολίτης στην καθημερινότητά του.»
-                    </p>
-                </div>
-                <div class="oped-card-footer">
-                    <span class="oped-time"><i class="far fa-clock"></i> 5 min read</span>
-                    <span class="oped-date">11 Σεπτεμβρίου 2026</span>
-                </div>
-            </article>
+            <p style="grid-column: 1 / -1; text-align: center; color: #64748b; padding: 30px;">Δεν υπάρχουν διαθέσιμα άρθρα αυτή τη στιγμή.</p>
             {% endif %}
             {% endfor %}
         </div>

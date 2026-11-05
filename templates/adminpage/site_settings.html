@@ -34,17 +34,17 @@
         <div class="card-body">
           <div class="form-group">
             <label class="form-label" for="site_title">Τίτλος Ιστότοπου</label>
-            <input class="form-control" type="text" id="site_title" name="site_title" value="DIANISMA.GR" placeholder="π.χ. DIANISMA.GR — Ενημερωτική Πύλη" />
+            <input class="form-control" type="text" id="site_title" name="site_title" value="{{ settings_data.site_title|default:'DIANISMA.GR' }}" placeholder="π.χ. DIANISMA.GR — Ενημερωτική Πύλη" />
           </div>
 
           <div class="form-group">
             <label class="form-label" for="site_slogan">Σλόγκαν / Υπότιτλος</label>
-            <input class="form-control" type="text" id="site_slogan" name="site_slogan" value="Πολιτική, Οικονομία, Κοινωνία, Αναλύσεις" placeholder="Σύντομη περιγραφή ιστότοπου" />
+            <input class="form-control" type="text" id="site_slogan" name="site_slogan" value="{{ settings_data.site_slogan|default:'Πολιτική, Οικονομία, Κοινωνία, Αναλύσεις' }}" placeholder="Σύντομη περιγραφή ιστότοπου" />
           </div>
 
           <div class="form-group">
             <label class="form-label" for="site_description">Meta Description (SEO)</label>
-            <textarea class="form-control" id="site_description" name="site_description" rows="3" placeholder="Περιγραφή για τις μηχανές αναζήτησης...">DIANISMA.GR — Έγκυρη ενημέρωση για την Πολιτική, την Οικονομία, την Κοινωνία και τις Αναλύσεις.</textarea>
+            <textarea class="form-control" id="site_description" name="site_description" rows="3" placeholder="Περιγραφή για τις μηχανές αναζήτησης...">{{ settings_data.site_description|default:'DIANISMA.GR — Έγκυρη ενημέρωση για την Πολιτική, την Οικονομία, την Κοινωνία και τις Αναλύσεις.' }}</textarea>
           </div>
         </div>
       </div>
@@ -58,22 +58,22 @@
           <div class="form-row-2">
             <div class="form-group">
               <label class="form-label" for="social_facebook"><i class="fab fa-facebook"></i> Facebook URL</label>
-              <input class="form-control" type="url" id="social_facebook" name="social_facebook" value="https://facebook.com" placeholder="https://facebook.com/..." />
+              <input class="form-control" type="url" id="social_facebook" name="social_facebook" value="{{ settings_data.social_facebook|default:'' }}" placeholder="https://facebook.com/..." />
             </div>
             <div class="form-group">
               <label class="form-label" for="social_twitter"><i class="fab fa-x-twitter"></i> X (Twitter) URL</label>
-              <input class="form-control" type="url" id="social_twitter" name="social_twitter" value="https://x.com" placeholder="https://x.com/..." />
+              <input class="form-control" type="url" id="social_twitter" name="social_twitter" value="{{ settings_data.social_twitter|default:'' }}" placeholder="https://x.com/..." />
             </div>
           </div>
 
           <div class="form-row-2">
             <div class="form-group">
               <label class="form-label" for="social_instagram"><i class="fab fa-instagram"></i> Instagram URL</label>
-              <input class="form-control" type="url" id="social_instagram" name="social_instagram" value="https://instagram.com" placeholder="https://instagram.com/..." />
+              <input class="form-control" type="url" id="social_instagram" name="social_instagram" value="{{ settings_data.social_instagram|default:'' }}" placeholder="https://instagram.com/..." />
             </div>
             <div class="form-group">
               <label class="form-label" for="social_youtube"><i class="fab fa-youtube"></i> YouTube URL</label>
-              <input class="form-control" type="url" id="social_youtube" name="social_youtube" value="https://youtube.com" placeholder="https://youtube.com/..." />
+              <input class="form-control" type="url" id="social_youtube" name="social_youtube" value="{{ settings_data.social_youtube|default:'' }}" placeholder="https://youtube.com/..." />
             </div>
           </div>
         </div>

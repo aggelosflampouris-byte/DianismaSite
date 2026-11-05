@@ -15,7 +15,7 @@ from django.db.models import Sum, Count, Q
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 from django.core.files.base import ContentFile
-from .models import Article, Category, AuthorApplication, Profile
+from .models import Article, Category, AuthorApplication, Profile, SiteSetting
 from .parsers import (
     validate_document_file,
     validate_image_file,
@@ -884,23 +884,37 @@ def category_edit(request, cat_id):
 
 # ─── Settings ──────────────────────────────────────────────────────────────────
 
+SETTINGS_KEYS = [
+    ('site_title', 'DIANISMA.GR', 'Τίτλος Ιστότοπου'),
+    ('site_slogan', 'Πολιτική, Οικονομία, Κοινωνία, Αναλύσεις', 'Σλόγκαν / Υπότιτλος'),
+    ('site_description', 'DIANISMA.GR — Έγκυρη ενημέρωση για την Πολιτική, την Οικονομία, την Κοινωνία και τις Αναλύσεις.', 'Meta Description (SEO)'),
+    ('social_facebook', 'https://facebook.com', 'Facebook URL'),
+    ('social_twitter', 'https://x.com', 'X (Twitter) URL'),
+    ('social_instagram', 'https://instagram.com', 'Instagram URL'),
+    ('social_youtube', 'https://youtube.com', 'YouTube URL'),
+]
+
+
 @staff_member_required(login_url='/adminpanel/login/')
 def site_settings(request):
-    """Global site settings page (SEO, social, layout).
-
-    NOTE: Persistence is not yet implemented. POST requests are rejected
-    with a clear error until a SiteSettings model or similar backing store
-    is added.
-    """
+    """Global site settings page (SEO, social, layout) with database persistence."""
     if not request.user.is_superuser:
         messages.error(request, 'Μόνο ο Super Admin έχει πρόσβαση στις ρυθμίσεις.')
         return redirect('adminpanel:dashboard')
 
     if request.method == 'POST':
-        # TODO: Implement a SiteSettings model and persist values here.
-        messages.error(request, 'Η αποθήκευση ρυθμίσεων δεν είναι ακόμη διαθέσιμη.')
+        for key, default_val, desc in SETTINGS_KEYS:
+            val = request.POST.get(key, '').strip()
+            SiteSetting.set_setting(key, val if val else default_val, description=desc)
+
+        messages.success(request, 'Οι ρυθμίσεις του ιστότοπου και τα social media αποθηκεύτηκαν επιτυχώς!')
         return redirect('adminpanel:site_settings')
 
+    settings_data = {}
+    for key, default_val, _ in SETTINGS_KEYS:
+        settings_data[key] = SiteSetting.get_setting(key, default_val)
+
     return render(request, 'adminpage/site_settings.html', {
+        'settings_data': settings_data,
         'active_page': 'settings',
     })

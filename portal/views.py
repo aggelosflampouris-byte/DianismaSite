@@ -49,8 +49,10 @@ def index(request):
     koinonia_articles  = cat_articles('koinonia',  [lead_id])
     analyseis_articles = cat_articles('analyseis', [lead_id])
 
-    # Opinions (up to 4 for carousel)
-    opinions = published.filter(category__slug='apopseis')[:4]
+    # Opinions (up to 4 for carousel; dynamic fallback to latest published if apopseis category is empty)
+    opinions = list(published.filter(category__slug='apopseis')[:4])
+    if not opinions:
+        opinions = list(published.exclude(id__in=[lead_id] + sec_ids)[:4])
 
     # Popular sidebar
     popular = published.order_by('-views_count')[:5]
@@ -220,7 +222,45 @@ def analyseis(request):
 
 
 def apopseis(request):
-    return category_view(request, 'apopseis', 'apopseis.html')
+    """
+    Dedicated view for opinions/apopseis.
+    Fetches opinion articles if category exists; falls back to published articles dynamically.
+    """
+    category = Category.objects.filter(slug='apopseis').first()
+    published = Article.objects.filter(status=Article.STATUS_PUBLISHED)
+    
+    if category and category.articles.filter(status=Article.STATUS_PUBLISHED).exists():
+        category_articles = published.filter(category=category)
+    else:
+        # Dynamic fallback: latest published articles across the site
+        category_articles = published
+
+    hero_article = category_articles.filter(is_featured=True).first() or category_articles.first()
+    hero_id = hero_article.id if hero_article else 0
+    other_articles = category_articles.exclude(id=hero_id).order_by('-published_at')
+
+    paginator = Paginator(other_articles, 12)
+    articles_page = paginator.get_page(1)
+
+    cat_popular = list(category_articles.order_by('-views_count')[:5])
+    if len(cat_popular) < 5:
+        existing_ids = [a.id for a in cat_popular]
+        global_popular = list(published.exclude(id__in=existing_ids).order_by('-views_count')[:5 - len(cat_popular)])
+        popular = cat_popular + global_popular
+    else:
+        popular = cat_popular
+
+    context = {
+        'category':          category,
+        'hero_article':      hero_article,
+        'articles':          articles_page,
+        'has_next':          articles_page.has_next(),
+        'next_page':         articles_page.next_page_number() if articles_page.has_next() else None,
+        'category_slug':     'apopseis',
+        'exclude_ids_str':   str(hero_id) if hero_id else '',
+        'popular_articles':  popular,
+    }
+    return render(request, 'apopseis.html', context)
 
 
 def category_generic(request, slug):
