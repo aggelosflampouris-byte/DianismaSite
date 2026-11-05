@@ -45,7 +45,7 @@ def _parse_article_post(post: dict, files, existing_pdf=None) -> tuple:
     author_name = post.get('author_name', '').strip()
     excerpt = post.get('excerpt', '').strip()
     content = post.get('content', '').strip()
-    lead_image_url = post.get('lead_image_url', '').strip()
+    lead_image_url = (post.get('lead_image_url') or post.get('featured_image_url') or '').strip()
     status_val = post.get('status', Article.STATUS_DRAFT).strip()
     is_featured = post.get('is_featured') == 'on'
 
@@ -64,7 +64,7 @@ def _parse_article_post(post: dict, files, existing_pdf=None) -> tuple:
             if extracted_html:
                 content = extracted_html
 
-    image_file = files.get('lead_image')
+    image_file = files.get('lead_image') or files.get('featured_image')
     if image_file:
         is_valid_img, img_err = validate_image_file(image_file)
         if not is_valid_img:

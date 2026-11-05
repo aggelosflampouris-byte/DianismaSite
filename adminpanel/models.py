@@ -221,6 +221,18 @@ class Article(models.Model):
         return reverse('article_detail', kwargs={'slug': self.slug})
 
     @property
+    def featured_image(self):
+        """Alias for lead_image to support featured_image property naming."""
+        return self.lead_image
+
+    @property
+    def featured_image_url(self):
+        """Alias for lead_image_url to support featured_image property naming."""
+        return self.lead_image_url
+
+    DEFAULT_FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&q=80&w=1000'
+
+    @property
     def get_image_url(self):
         """Return lead_image URL, lead_image_url, or fallback image."""
         url = ''
@@ -230,7 +242,7 @@ class Article(models.Model):
             except Exception:
                 url = ''
         if not url and self.lead_image_url:
-            url = self.lead_image_url
+            url = self.lead_image_url.strip()
 
         if url:
             from django.conf import settings
@@ -239,7 +251,7 @@ class Article(models.Model):
             url = url.replace('image/upload/image/upload/', 'image/upload/')
             return url
 
-        return 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&q=80&w=1000'
+        return self.DEFAULT_FALLBACK_IMAGE
 
     @property
     def display_author_name(self):

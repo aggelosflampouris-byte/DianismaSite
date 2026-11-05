@@ -211,9 +211,9 @@
                    accept="image/jpeg,image/png,image/webp" />
             <small style="color: #64748b; font-size: 11px; display: block; margin-top: 4px;">Υποστηρίζονται: JPG, PNG, WebP (έως 10MB)</small>
             {% if errors.lead_image %}<div class="form-error">⚠️ {{ errors.lead_image }}</div>{% endif %}
-            {% if is_edit and article.lead_image %}
+            {% if is_edit %}
               <div style="margin-top: 8px;">
-                <img src="{{ article.lead_image.url }}" alt="Preview" style="max-width: 100%; border-radius: 4px; max-height: 110px; object-fit: cover;" />
+                <img src="{{ article.get_image_url }}" alt="Preview" style="max-width: 100%; border-radius: 4px; max-height: 110px; object-fit: cover;" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&q=80&w=1000';" />
               </div>
             {% endif %}
           </div>
