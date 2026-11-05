@@ -15,7 +15,7 @@ from django.db.models import Sum, Count, Q
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 from django.core.files.base import ContentFile
-from .models import Article, Category, AuthorApplication, Profile, SiteSetting
+from .models import Article, Category, Profile, SiteSetting
 from .parsers import (
     validate_document_file,
     validate_image_file,
@@ -239,9 +239,7 @@ def dashboard(request):
     draft_articles = Article.objects.filter(status=Article.STATUS_DRAFT).count()
     pending_articles = Article.objects.filter(status=Article.STATUS_PENDING).count()
     total_views = Article.objects.aggregate(Sum('views_count'))['views_count__sum'] or 0
-    total_authors = Profile.objects.filter(status=Profile.STATUS_APPROVED).count()
     total_users = User.objects.count()
-    pending_apps = AuthorApplication.objects.filter(status=AuthorApplication.STATUS_PENDING).count()
 
     # Category distribution
     cat_data = []
@@ -255,11 +253,10 @@ def dashboard(request):
         status=Article.STATUS_PUBLISHED
     ).select_related('category').order_by('-views_count')[:8]
 
-    # Recent articles & applications
+    # Recent articles
     recent_articles = Article.objects.select_related('category', 'author').order_by('-created_at')[:8]
-    recent_applications = AuthorApplication.objects.order_by('-created_at')[:5]
 
-    # Per-author stats
+    # Per-author stats (PERF-01: single annotated query instead of loop)
     author_stats = (
         Article.objects.filter(status=Article.STATUS_PUBLISHED)
         .values('author_name')
@@ -275,13 +272,10 @@ def dashboard(request):
         'draft_articles': draft_articles,
         'pending_articles': pending_articles,
         'total_views': total_views,
-        'total_authors': total_authors,
         'total_users': total_users,
-        'pending_applications': pending_apps,
         'category_data': cat_data,
         'top_articles': top_articles,
         'recent_articles': recent_articles,
-        'recent_applications': recent_applications,
         'author_stats': author_stats,
     }
 
@@ -384,7 +378,10 @@ def article_parse_document_ajax(request):
 
 @staff_member_required(login_url='/adminpanel/login/')
 def article_create(request):
-    """Create a new editorial or community article."""
+    """Create a new editorial article (superuser only)."""
+    if not request.user.is_superuser:
+        messages.error(request, 'Μόνο ο Super Admin μπορεί να δημιουργήσει άρθρα.')
+        return redirect('adminpanel:dashboard')
     categories = Category.objects.all().order_by('order', 'name')
     errors = {}
 
@@ -422,7 +419,10 @@ def article_create(request):
 
 @staff_member_required(login_url='/adminpanel/login/')
 def article_edit(request, article_id):
-    """Edit an existing article."""
+    """Edit an existing article (superuser only)."""
+    if not request.user.is_superuser:
+        messages.error(request, 'Μόνο ο Super Admin μπορεί να επεξεργαστεί άρθρα.')
+        return redirect('adminpanel:dashboard')
     article = get_object_or_404(Article, id=article_id)
     categories = Category.objects.all().order_by('order', 'name')
     errors = {}
@@ -480,7 +480,10 @@ def article_edit(request, article_id):
 
 @staff_member_required(login_url='/adminpanel/login/')
 def article_delete(request, article_id):
-    """Delete an article (POST only)."""
+    """Delete an article (superuser only)."""
+    if not request.user.is_superuser:
+        messages.error(request, 'Μόνο ο Super Admin μπορεί να διαγράψει άρθρα.')
+        return redirect('adminpanel:dashboard')
     if request.method == 'POST':
         article = get_object_or_404(Article, id=article_id)
         title = article.title
@@ -491,7 +494,10 @@ def article_delete(request, article_id):
 
 @staff_member_required(login_url='/adminpanel/login/')
 def article_toggle_status(request, article_id):
-    """Toggle article status between published and draft."""
+    """Toggle article status between published and draft (superuser only)."""
+    if not request.user.is_superuser:
+        messages.error(request, 'Μόνο ο Super Admin μπορεί να αλλάξει κατάσταση άρθρου.')
+        return redirect('adminpanel:dashboard')
     if request.method == 'POST':
         article = get_object_or_404(Article, id=article_id)
         if article.status == Article.STATUS_PUBLISHED:
@@ -507,7 +513,10 @@ def article_toggle_status(request, article_id):
 
 @staff_member_required(login_url='/adminpanel/login/')
 def article_toggle_featured(request, article_id):
-    """Toggle is_featured flag on an article."""
+    """Toggle is_featured flag on an article (superuser only)."""
+    if not request.user.is_superuser:
+        messages.error(request, 'Μόνο ο Super Admin μπορεί να ορίσει featured άρθρο.')
+        return redirect('adminpanel:dashboard')
     if request.method == 'POST':
         article = get_object_or_404(Article, id=article_id)
         article.is_featured = not article.is_featured
@@ -515,91 +524,6 @@ def article_toggle_featured(request, article_id):
         state = 'Featured ✅' if article.is_featured else 'κανονικό'
         messages.success(request, f'Το άρθρο «{article.title}» ορίστηκε ως {state}.')
     return redirect('adminpanel:articles_list')
-
-
-# ─── Authors / Applications ────────────────────────────────────────────────────
-
-@staff_member_required(login_url='/adminpanel/login/')
-def authors_list(request):
-    """List of all contributor applications for Writers."""
-    status_filter = request.GET.get('status', '').strip()
-    qs = AuthorApplication.objects.all().order_by('-created_at')
-
-    if status_filter:
-        qs = qs.filter(status=status_filter)
-
-    pending_count = AuthorApplication.objects.filter(status=AuthorApplication.STATUS_PENDING).count()
-
-    return render(request, 'adminpage/authors_list.html', {
-        'applications': qs,
-        'status_filter': status_filter,
-        'pending_count': pending_count,
-        'active_page': 'authors',
-    })
-
-
-@staff_member_required(login_url='/adminpanel/login/')
-def author_detail(request, app_id):
-    """Review dossier for a single author application."""
-    application = get_object_or_404(AuthorApplication, id=app_id)
-    decision_choices = [
-        ('approved', '✅ Έγκριση Συντάκτη'),
-        ('rejected', '❌ Απόρριψη'),
-        ('pending', '⏳ Παραμονή σε Εκκρεμότητα'),
-    ]
-    return render(request, 'adminpage/author_detail.html', {
-        'application': application,
-        'decision_choices': decision_choices,
-        'active_page': 'authors',
-    })
-
-
-@staff_member_required(login_url='/adminpanel/login/')
-def author_review(request, app_id):
-    """Submit review decision for author application."""
-    if request.method == 'POST':
-        application = get_object_or_404(AuthorApplication, id=app_id)
-        decision = request.POST.get('decision', '').strip()
-        admin_notes = request.POST.get('admin_notes', '').strip()
-
-        if decision in ['approved', 'rejected', 'pending']:
-            application.status = decision
-            application.admin_notes = admin_notes
-            application.reviewed_by = request.user
-            application.reviewed_at = timezone.now()
-            application.save()
-
-            if decision == 'approved':
-                # Derive a unique username from the email prefix, avoiding collisions.
-                base_username = application.email.split('@')[0]
-                username = base_username
-                while User.objects.filter(username=username).exists():
-                    username = f"{base_username}_{uuid.uuid4().hex[:6]}"
-
-                user, _ = User.objects.get_or_create(
-                    email=application.email,
-                    defaults={
-                        'username': username,
-                        'first_name': application.full_name.split()[0],
-                        'last_name': (
-                            " ".join(application.full_name.split()[1:])
-                            if len(application.full_name.split()) > 1
-                            else ''
-                        ),
-                    }
-                )
-                profile, _ = Profile.objects.get_or_create(user=user)
-                profile.profession = application.profession
-                profile.topic_interest = application.topic_interest
-                profile.bio = application.bio
-                profile.status = Profile.STATUS_APPROVED
-                profile.is_verified_contributor = True
-                profile.save()
-
-            messages.success(request, f'Η απόφαση για την αίτηση του/της {application.full_name} καταχωρήθηκε ({decision}).')
-            return redirect('adminpanel:author_detail', app_id=app_id)
-
-    return redirect('adminpanel:authors_list')
 
 
 # ─── Users Management ──────────────────────────────────────────────────────────

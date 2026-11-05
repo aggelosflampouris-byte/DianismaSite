@@ -121,25 +121,18 @@ _cloud_name = os.environ.get('CLOUDINARY_CLOUD_NAME', '').strip()
 _api_key = os.environ.get('CLOUDINARY_API_KEY', '').strip()
 _api_secret = os.environ.get('CLOUDINARY_API_SECRET', '').strip()
 
-# Always enforce active cloud name if empty or legacy 'dianisma'
-if not _cloud_name or _cloud_name == 'dianisma':
-    _cloud_name = 'dh7aqmruq'
-
 # Support parsing from CLOUDINARY_URL if separate credentials not passed
-if _cloudinary_url and (not _api_key or not _api_secret):
+if _cloudinary_url and (not _api_key or not _api_secret or not _cloud_name):
     import urllib.parse
     try:
         parsed_c = urllib.parse.urlsplit(_cloudinary_url)
         if parsed_c.scheme == 'cloudinary':
-            _api_key = parsed_c.username or _api_key
-            _api_secret = parsed_c.password or _api_secret
-            if parsed_c.hostname and parsed_c.hostname != 'dianisma':
-                _cloud_name = parsed_c.hostname
+            _api_key = _api_key or parsed_c.username or ''
+            _api_secret = _api_secret or parsed_c.password or ''
+            if parsed_c.hostname:
+                _cloud_name = _cloud_name or parsed_c.hostname
     except Exception:
         pass
-
-if not _api_key:
-    _api_key = '783348361251748'
 
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': _cloud_name,
@@ -147,7 +140,7 @@ CLOUDINARY_STORAGE = {
     'API_SECRET': _api_secret,
 }
 
-_has_cloudinary = bool(_api_key and _api_secret) or bool(_cloudinary_url)
+_has_cloudinary = bool(_cloud_name and _api_key and _api_secret) or bool(_cloudinary_url)
 
 STORAGES = {
     'staticfiles': {
@@ -162,6 +155,18 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ── Production Security Hardening ─────────────────────────────────────────────
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
+
 
 LOGIN_URL = '/adminpanel/login/'
 LOGIN_REDIRECT_URL = '/dialogues/'

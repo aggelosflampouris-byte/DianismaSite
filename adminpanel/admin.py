@@ -2,7 +2,7 @@
 Django admin registrations for DIANISMA.GR models.
 """
 from django.contrib import admin
-from .models import Category, Article, AuthorApplication, Profile
+from .models import Category, Article, Profile
 
 
 @admin.register(Profile)
@@ -49,14 +49,3 @@ class ArticleAdmin(admin.ModelAdmin):
     def draft_articles(self, request, queryset):
         queryset.update(status=Article.STATUS_DRAFT)
 
-
-@admin.register(AuthorApplication)
-class AuthorApplicationAdmin(admin.ModelAdmin):
-    list_display = ('full_name', 'email', 'profession', 'topic_interest', 'status', 'created_at')
-    list_filter = ('status',)
-    search_fields = ('full_name', 'email', 'profession', 'bio')
-    actions = ['approve_applications']
-
-    @admin.action(description='Έγκριση επιλεγμένων αιτήσεων')
-    def approve_applications(self, request, queryset):
-        queryset.update(status=AuthorApplication.STATUS_APPROVED)

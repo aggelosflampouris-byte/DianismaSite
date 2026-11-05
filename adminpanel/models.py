@@ -264,65 +264,6 @@ class Article(models.Model):
         return badges.get(self.status, 'badge-draft')
 
 
-class AuthorApplication(models.Model):
-    """Applications by community members to become Writers."""
-    
-    STATUS_PENDING = 'pending'
-    STATUS_APPROVED = 'approved'
-    STATUS_REJECTED = 'rejected'
-
-    STATUS_CHOICES = [
-        (STATUS_PENDING, '⏳ Εκκρεμεί'),
-        (STATUS_APPROVED, '✅ Εγκρίθηκε'),
-        (STATUS_REJECTED, '❌ Απορρίφθηκε'),
-    ]
-
-    full_name = models.CharField('Ονοματεπώνυμο', max_length=150)
-    email = models.EmailField('Email Επικοινωνίας')
-    profession = models.CharField('Ιδιότητα / Επάγγελμα', max_length=150)
-    topic_interest = models.CharField('Κύρια Θεματική Ενδιαφέροντος', max_length=100)
-    bio = models.TextField('Σύντομο Βιογραφικό / Παρουσίαση')
-    sample_text = models.TextField('Δείγμα Γραφής / Προσχέδιο Άρθρου', blank=True)
-    questionnaire_data = models.JSONField(
-        'Απαντήσεις Ερωτηματολογίου',
-        default=dict,
-        blank=True
-    )
-    status = models.CharField(
-        'Κατάσταση Αίτησης',
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default=STATUS_PENDING
-    )
-    admin_notes = models.TextField('Σημειώσεις Διαχειριστή', blank=True)
-    reviewed_by = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='reviewed_applications',
-        verbose_name='Εξετάστηκε από'
-    )
-    created_at = models.DateTimeField('Ημερομηνία Υποβολής', default=timezone.now)
-    reviewed_at = models.DateTimeField('Ημερομηνία Εξέτασης', null=True, blank=True)
-
-    class Meta:
-        verbose_name = 'Αίτηση Συντάκτη'
-        verbose_name_plural = 'Αιτήσεις Συντακτών'
-        ordering = ['-created_at']
-
-    def __str__(self):
-        return f"{self.full_name} ({self.get_status_display()})"
-
-    @property
-    def status_badge_class(self):
-        badges = {
-            self.STATUS_PENDING: 'badge-pending',
-            self.STATUS_APPROVED: 'badge-approved',
-            self.STATUS_REJECTED: 'badge-rejected',
-        }
-        return badges.get(self.status, 'badge-pending')
-
 
 class SiteSetting(models.Model):
     """Key-value site settings backing store with default fallback values."""

@@ -1,11 +1,14 @@
 """
 Views for DIANISMA.GR public portal and contributor interactions.
 """
+import hashlib
 import logging
 import urllib.parse
+from datetime import date
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.db.models import F, Q
 from django.http import HttpResponse, JsonResponse
@@ -13,8 +16,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.template import TemplateDoesNotExist
 from django.template.loader import get_template, render_to_string
 
-from adminpanel.models import Article, AuthorApplication, Category, Profile
-from .forms import WriterApplicationForm, WriterArticleSubmitForm
+from adminpanel.models import Article, Category
 
 logger = logging.getLogger(__name__)
 
@@ -279,75 +281,35 @@ def category_generic(request, slug):
 
 
 def apply_writer(request):
-    """Handle writer applications (POST)."""
-    if request.method == 'POST':
-        name = request.POST.get('full_name') or request.POST.get('name')
-        email = request.POST.get('email')
-        profession = request.POST.get('profession') or request.POST.get('role')
-        topic_interest = request.POST.get('topic_interest') or request.POST.get('topic', 'apopseis')
-        bio = request.POST.get('bio') or request.POST.get('appBio', '')
-        sample_text = request.POST.get('sample_text', '')
-
-        if name and email and profession:
-            AuthorApplication.objects.create(
-                full_name=name.strip(),
-                email=email.strip(),
-                profession=profession.strip(),
-                topic_interest=topic_interest.strip(),
-                bio=bio.strip(),
-                sample_text=sample_text.strip(),
-                status=AuthorApplication.STATUS_PENDING
-            )
-            messages.success(request, 'Η αίτησή σας υποβλήθηκε επιτυχώς! Η συντακτική ομάδα θα επικοινωνήσει μαζί σας.')
-            return redirect('apopseis')
-        else:
-            messages.error(request, 'Παρακαλούμε συμπληρώστε όλα τα απαιτούμενα πεδία.')
-
-    form = WriterApplicationForm()
-    return render(request, 'apply_writer.html', {'application_form': form})
+    """SEC-04: Writer applications have been disabled. Redirect to homepage."""
+    return redirect('index')
 
 
 @login_required
 def writer_dashboard(request):
-    """Allow approved contributors to submit an article with PDF."""
-    user = request.user
-    profile = getattr(user, 'profile', None)
-
-    # Check permission: must be approved contributor or staff
-    if not (user.is_staff or (profile and profile.status == Profile.STATUS_APPROVED)):
-        messages.warning(request, 'Απαιτείται έγκριση συντάκτη για την υποβολή άρθρου.')
-        return redirect('index')
-
-    if request.method == 'POST':
-        form = WriterArticleSubmitForm(request.POST, request.FILES)
-        if form.is_valid():
-            article = form.save(commit=False)
-            article.author = user
-            article.author_name = user.get_full_name() or user.username
-            article.author_title = profile.profession if profile else ''
-            article.status = Article.STATUS_PENDING  # Pending approval
-            article.save()
-            messages.success(request, 'Το άρθρο σας υποβλήθηκε επιτυχώς και βρίσκεται υπό έλεγχο από τη συντακτική ομάδα!')
-            return redirect('writer_dashboard')
-    else:
-        form = WriterArticleSubmitForm()
-
-    # Get recent submissions by this user
-    my_articles = Article.objects.filter(author=user).order_by('-created_at')[:10]
-
-    return render(request, 'writer_dashboard.html', {'form': form, 'my_articles': my_articles})
+    """SEC-04: Writer dashboard has been disabled. Redirect to homepage."""
+    return redirect('index')
 
 
 def article_detail(request, slug):
     """Full detail page for any published article."""
     article = get_object_or_404(Article, slug=slug, status=Article.STATUS_PUBLISHED)
-    
-    # Increment views count uniquely per session
-    viewed_articles = request.session.get('viewed_articles', [])
-    if article.id not in viewed_articles:
+
+    # SEC-03: Increment views uniquely per IP+User-Agent hash (daily window).
+    # This prevents view inflation via session clearing or repeated requests.
+    client_ip = (
+        request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip()
+        or request.META.get('REMOTE_ADDR', '')
+    )
+    user_agent = request.META.get('HTTP_USER_AGENT', '')
+    today = date.today().isoformat()
+    view_key = 'article_view:' + hashlib.sha256(
+        f"{client_ip}:{user_agent}:{article.id}:{today}".encode()
+    ).hexdigest()
+
+    if not cache.get(view_key):
         Article.objects.filter(id=article.id).update(views_count=F('views_count') + 1)
-        viewed_articles.append(article.id)
-        request.session['viewed_articles'] = viewed_articles
+        cache.set(view_key, True, timeout=86400)  # 24-hour window
         article.refresh_from_db()
 
     # Related articles (3 articles from same category, fallback to latest)
@@ -430,13 +392,25 @@ def about(request):
 
 
 def contact(request):
-    """Contact page & Form handler.
+    """Contact page & Form handler with IP-based rate limiting (5 requests / 10 min).
 
     TODO: Replace the logger call with Django send_mail / a ContactMessage
     model once the email backend or persistence layer is configured.
     """
 
     if request.method == 'POST':
+        # SEC-03: Cache-based rate limiting — max 5 submissions per IP per 10 minutes
+        client_ip = (
+            request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip()
+            or request.META.get('REMOTE_ADDR', '')
+        )
+        rate_key = f'contact_rate:{client_ip}'
+        submission_count = cache.get(rate_key, 0)
+        if submission_count >= 5:
+            messages.error(request, 'Πολλές αποστολές μηνύματος. Παρακαλούμε δοκιμάστε ξανά σε λίγα λεπτά.')
+            return redirect('contact')
+        cache.set(rate_key, submission_count + 1, timeout=600)  # 10-minute window
+
         name = request.POST.get('name', '').strip()
         email = request.POST.get('email', '').strip()
         subject = request.POST.get('subject', '').strip()

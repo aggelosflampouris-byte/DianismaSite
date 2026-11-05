@@ -24,11 +24,6 @@ urlpatterns = [
     path('articles/<int:article_id>/toggle-status/', views.article_toggle_status, name='article_toggle_status'),
     path('articles/<int:article_id>/toggle-featured/', views.article_toggle_featured, name='article_toggle_featured'),
 
-    # Authors / Applications
-    path('authors/', views.authors_list, name='authors_list'),
-    path('authors/<int:app_id>/', views.author_detail, name='author_detail'),
-    path('authors/<int:app_id>/review/', views.author_review, name='author_review'),
-
     # Users (Boss only)
     path('users/', views.users_list, name='users_list'),
     path('users/create/', views.user_create, name='user_create'),
