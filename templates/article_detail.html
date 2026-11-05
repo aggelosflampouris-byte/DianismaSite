@@ -379,7 +379,7 @@
     <!-- Article Content Body -->
     <div class="article-detail-body">
         {% if article.content %}
-            {{ article.content|clean_content }}
+            {{ article.content|clean_content:article.get_image_url }}
         {% elif article.pdf_file %}
             <div style="text-align:center;margin:40px 0;padding:30px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;">
                 <i class="fas fa-file-pdf" style="font-size:3rem;color:#b91c1c;margin-bottom:15px;display:block;"></i>
